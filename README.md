@@ -1,0 +1,4 @@
+Courses
+=======
+
+Version tracked courses
