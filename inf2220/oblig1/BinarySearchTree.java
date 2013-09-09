@@ -1,3 +1,6 @@
+import java.util.Scanner;
+import java.io.File;
+
 public class BinarySearchTree<T extends Comparable<? super T>>
 {
 	private static class BinaryNode<T>
@@ -41,9 +44,42 @@ public class BinarySearchTree<T extends Comparable<? super T>>
 		root = insert(x, root);
 	}
 
+	public void remove(T x)
+	{
+		root = remove(x, root);
+	}
+
+	public T findMin()
+	{
+		return findMin(root).content;
+	}
+
+	public T findMax()
+	{
+		return findMax(root).content;
+	}
+
 	public void printTree()
 	{
 		printTree(root);
+	}
+
+	private BinaryNode<T> findMin(BinaryNode<T> t)
+	{
+		if (t==null)
+			return null;
+		else if (t.left == null)
+			return t;
+		return findMin(t.left);
+	}
+
+	private BinaryNode<T> findMax(BinaryNode<T> t)
+	{
+		if (t != null)
+			while (t.right != null)
+				t = t.right;
+
+		return t;  
 	}
 
 	private void printTree(BinaryNode<T> t)
@@ -94,16 +130,121 @@ public class BinarySearchTree<T extends Comparable<? super T>>
 		return t;
 	}
 
+	private BinaryNode<T> remove(T x, BinaryNode<T> t)
+	{
+		if (t==null)
+			return t; // Nothing to remove
+		int compareResult = x.compareTo(t.content);
+
+		if (compareResult < 0)
+		{
+			t.left = remove(x, t.left);
+		}
+		else if (compareResult > 0)
+		{
+			t.right = remove(x, t.right);
+		}
+		else if (t.left != null && t.right != null) // two children
+		{
+			t.content = findMin(t.right).content;
+			t.right = remove(t.content, t.right);
+		}
+		else 
+			t = (t.left != null) ? t.left : t.right; // ternary operator
+		return t;
+	}
+
 }
 
-class TestBinaryTree
+class TestDictionary
 {
 	public static void main(String[] args)
 	{
-		String[] words = {"hei", "deg", "dette", "er", "en", "samling", "med", "ord"};
-		BinarySearchTree<String> tree = new BinarySearchTree<String>(); 
-		for (int i = 0; i<words.length; i++)
-			tree.insert(words[i]);
-		tree.printTree();
+		String filename = args[0];
+		dict = new Dictionary(filename);
+		dict.print();
+		run();
+	}
+
+	static Dictionary dict;
+
+	public static void run()
+	{
+		Scanner sc = new Scanner(System.in);
+		while (true)
+		{	
+			System.out.println("Enter a word: ");
+			String word = sc.next();
+			boolean isFound = dict.search(word);
+			if (isFound)
+				System.out.println("Found word");
+			else
+				System.out.println("Conldnt find word");
+		}
 	}
 }
+
+class Dictionary
+{
+	public Dictionary() 
+	{
+
+	}
+
+	public Dictionary(String filename)
+	{
+		readFile(filename);
+	}
+
+	BinarySearchTree<String> tree;
+
+	public void readFile(String filename)
+	{
+		System.out.println("Reading words from " + filename);
+		File inFile = null;
+		try
+		{
+			inFile = new File(filename);
+		}
+		catch (NullPointerException e)
+		{
+			System.out.println("File not found!");
+			System.exit(1);
+		}
+
+		Scanner scanner = null;
+		try 
+		{
+			scanner = new Scanner(inFile);
+		}
+		catch (java.io.FileNotFoundException e)
+		{
+			System.out.println("File not found!");
+			System.exit(1);
+		}
+
+		tree = new BinarySearchTree<String>(); 
+		while (scanner.hasNext())
+			tree.insert(scanner.next());
+
+	}
+
+	public void print()
+	{
+		tree.printTree();
+	}
+
+
+	public boolean search(String word)
+	{
+		if(tree.contains(word))
+		{
+			return true;
+		}
+		else
+			return false;
+
+	}
+}
+
+
