@@ -1,5 +1,6 @@
 import java.util.Scanner;
 import java.io.File;
+import java.util.*;
 
 public class BinarySearchTree<T extends Comparable<? super T>>
 {
@@ -163,6 +164,7 @@ class TestDictionary
 		String filename = args[0];
 		dict = new Dictionary(filename);
 		dict.print();
+		dict.oblig1init();
 		run();
 	}
 
@@ -176,10 +178,7 @@ class TestDictionary
 			System.out.println("Enter a word: ");
 			String word = sc.next();
 			boolean isFound = dict.search(word);
-			if (isFound)
-				System.out.println("Found word");
-			else
-				System.out.println("Conldnt find word");
+			System.out.println("-----------------------------------");
 		}
 	}
 }
@@ -197,6 +196,8 @@ class Dictionary
 	}
 
 	BinarySearchTree<String> tree;
+	String alphabet_string = "abcdefghijklmnopqrstuvwxyz";
+	char[] alphabet = alphabet_string.toCharArray();
 
 	public void readFile(String filename)
 	{
@@ -229,6 +230,12 @@ class Dictionary
 
 	}
 
+	public void oblig1init()
+	{
+		tree.remove("familie");
+		tree.insert("familie");
+	}
+
 	public void print()
 	{
 		tree.printTree();
@@ -242,9 +249,146 @@ class Dictionary
 			return true;
 		}
 		else
+		{
+			System.out.println("Word not found");
+			String[] similar_words = findSimilar(word);
+			if (similar_words.length > 0)
+			{
+				System.out.println("Suggested similar words: ");
+				for (String similar_word : similar_words)
+					System.out.println(similar_word);
+			}
+			else
+				System.out.println("No suggestions for similar words");
 			return false;
+		}
+	}
+
+	private String[] search(String[] words)
+	{
+		ArrayList<String> found_words = new ArrayList<>(); 
+		for (String word : words)
+		{
+			if (tree.contains(word))
+				found_words.add(word);
+		}
+		return found_words.toArray(new String[0]);
+	}
+
+	private String[] findSimilar(String word)
+	{
+		ArrayList<String> similar_words_list = new ArrayList<>();
+		similar_words_list.addAll(findSimilarSwappedNextToEachother(word));
+		similar_words_list.addAll(findSimilarReplacedOneLetter(word));
+		similar_words_list.addAll(findSimilarRemovedOneLetter(word));
+		similar_words_list.addAll(findSimilarAddedOneLetter(word));
+		String[] similar_words = (String[]) similar_words_list.toArray(new String[0]);
+		/* Magic solution with the new String[0]
+		
+		System.out.println("Printing similiar words:");
+		for (int i = 0; i<similar_words.length; i++) 
+		{
+			System.out.println(similar_words[i]);
+		}
+		*/
+		return search(similar_words);
+	}
+
+	private ArrayList<String> findSimilarSwappedNextToEachother(String word)
+	{
+		ArrayList<String> words = new ArrayList<>();
+
+		for (int i = 0; i<word.length() - 1; i ++)
+		{
+			words.add(swap(i, i+1, word));
+		}
+		words.trimToSize();
+		return words;
+	}
+
+	private ArrayList<String> findSimilarReplacedOneLetter(String word)
+	{
+		ArrayList<String> words = new ArrayList<>();
+		for (int i = 0; i<word.length(); i++)
+		{
+			for (int j = 0; j<alphabet.length; j++)
+			{
+				if (word.charAt(i) != alphabet[j])
+				{
+					words.add(switchChar(i, alphabet[j], word));
+				}
+
+			}
+		}
+		words.trimToSize();
+		return words;
+	}
+
+	private ArrayList<String> findSimilarRemovedOneLetter(String word)
+	{
+		ArrayList<String> words = new ArrayList<>();
+		for (int i = 0; i<word.length()+1; i++)
+			for (int j = 0; j<alphabet.length; j++)
+				words.add(addChar(i, alphabet[j], word));
+		words.trimToSize();
+		return words;
+	}
+
+	private ArrayList<String> findSimilarAddedOneLetter(String word)
+	{
+		ArrayList<String> words = new ArrayList<>();
+		for (int i = 0; i<word.length(); i++)
+			words.add(removeChar(i, word));
+		words.trimToSize();
+		return words;
+	}
+
+	private String swap(int i, int j, String s)
+	{
+		char[] word_array = s.toCharArray();
+		char ch_i = word_array[i];
+		word_array[i] = word_array[j];
+		word_array[j] = ch_i;
+		return new String(word_array);
+	}
+	private String switchChar(int i, char c, String s)
+	{
+		char[] tmp = s.toCharArray();
+		tmp[i] = c;
+		return new String(tmp);
+	}
+
+	private String addChar(int i, char c, String s)
+	{
+		char[] tmp = s.toCharArray();
+		char[] ret = new char[tmp.length+1];
+		int j; // To be used in tweo for loops, hence declared
+		
+		for (j = 0; j < i; j++)
+			ret[j] = tmp[j];
+
+		ret[i] = c;
+		
+		for (j = i+1; j<ret.length; j++)
+			ret[j] = tmp[j-1];
+		return new String(ret);
+	}
+
+	private String removeChar(int i, String s)
+	{
+		char[] tmp = s.toCharArray();
+		char[] ret = new char[tmp.length-1];
+		int j;
+		for (j = 0; j < i; j++)
+			ret[j] = tmp[j];
+
+		for (j=i; j<ret.length; j++)
+			ret[j] = tmp[j+1];
+		return new String(ret);
 
 	}
 }
+
+
 
 
