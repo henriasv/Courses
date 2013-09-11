@@ -25,7 +25,60 @@ public class BinarySearchTree<T extends Comparable<? super T>>
 		BinaryNode<T> right;
 	}
 
+	private class ThreeStatistics
+	{
+		ThreeStatistics()
+		{
+			depth = 0;
+			meanDepth = 0;
+			firstElement = null;
+			lastElement = null;
+			current_depth = 1;
+			nodesOnEachDepth = new int[size/10];
+		}
+		// Data structure to carry statistics
+		int depth;
+		int[] nodesOnEachDepth;
+		double meanDepth;
+		T firstElement;
+		T lastElement;
+
+		// Data when running statistics
+		int current_depth;
+		int max_depth;
+		int sum_depth;
+
+		public void deeper() {current_depth ++;}
+		public void shallower() {current_depth --;}
+		
+		public void stat()
+		{
+			sum_depth += current_depth;
+			try
+			{
+				nodesOnEachDepth[current_depth] ++;
+			} catch (IndexOutOfBoundsException e)
+			{
+				System.out.println("too deep");
+			}
+		}
+		public void statLeaf()
+		{
+			if (current_depth>max_depth)
+				max_depth = current_depth;
+		}
+
+		public void update()
+		{
+			depth = max_depth;
+			meanDepth = (double)sum_depth/size;
+			firstElement = findMin();
+			lastElement = findMax();
+		}
+	}
+
 	private BinaryNode<T> root;
+	private int size;
 
 	public BinarySearchTree() 
 	{
@@ -63,6 +116,18 @@ public class BinarySearchTree<T extends Comparable<? super T>>
 	public void printTree()
 	{
 		printTree(root);
+	}
+
+	public void printStatistics()
+	{
+		// depth
+		// Nodes on each depth
+		// Average depth
+		// final and first word
+		ThreeStatistics stat = statistics();
+		System.out.println("Statistics on binary tree: ");
+		System.out.println("Depth: " + Integer.toString(stat.depth));
+		System.out.println("meanDepth: " + Double.toString(stat.meanDepth));
 	}
 
 	private BinaryNode<T> findMin(BinaryNode<T> t)
@@ -105,7 +170,7 @@ public class BinarySearchTree<T extends Comparable<? super T>>
 
 		int compareResult = x.compareTo(t.content);
 
-		if(compareResult < 0) 
+		if (compareResult < 0) 
 			return contains(x, t.left);
 		else if (compareResult > 0)
 			return contains(x, t.right);
@@ -115,10 +180,13 @@ public class BinarySearchTree<T extends Comparable<? super T>>
 
 	private BinaryNode<T> insert(T x, BinaryNode<T> t)
 	{
-		// If the roor does not exist, ie the tree is empty
+		// If the root does not exist, ie the subtree is empty
 		if (t == null)
+		{	
+			size ++;
 			return new BinaryNode<T>(x, null, null);
-		
+		}
+
 		int compareResult = x.compareTo(t.content);
 		
 		if(compareResult < 0)
@@ -155,6 +223,38 @@ public class BinarySearchTree<T extends Comparable<? super T>>
 		return t;
 	}
 
+	/** 
+	 * @return ThreeStatistics<T>
+	 */
+	private ThreeStatistics statistics()
+	{
+		ThreeStatistics stat = new ThreeStatistics();
+		BinaryNode<T> t = root;
+		traverse(t, stat);
+		stat.update();
+		return stat;
+	}
+
+	private void traverse(BinaryNode<T> t, ThreeStatistics stat)
+	{
+		stat.stat();
+		if (t.left!= null)
+		{
+			t = t.left;
+			stat.deeper();
+			traverse(t, stat);
+		}
+		else if (t.right != null)
+		{
+			t = t.right;
+			stat.deeper();
+			traverse(t, stat);
+		}
+		stat.statLeaf();
+		stat.shallower();
+		System.out.println(Integer.toString(stat.current_depth));
+		return;
+	}
 }
 
 class TestDictionary
@@ -163,7 +263,7 @@ class TestDictionary
 	{
 		String filename = args[0];
 		dict = new Dictionary(filename);
-		dict.print();
+		//dict.print();
 		dict.oblig1init();
 		run();
 	}
@@ -177,6 +277,8 @@ class TestDictionary
 		{	
 			System.out.println("Enter a word: ");
 			String word = sc.next();
+			if (word.compareTo("q")==0)
+				System.exit(0);
 			boolean isFound = dict.search(word);
 			System.out.println("-----------------------------------");
 		}
@@ -228,6 +330,8 @@ class Dictionary
 		while (scanner.hasNext())
 			tree.insert(scanner.next());
 
+		tree.printStatistics();
+
 	}
 
 	public void oblig1init()
@@ -246,12 +350,17 @@ class Dictionary
 	{
 		if(tree.contains(word))
 		{
+			System.out.println("Found word: " + word);
 			return true;
 		}
 		else
 		{
 			System.out.println("Word not found");
+			long startTime = System.nanoTime();
 			String[] similar_words = findSimilar(word);
+			long timeUsed = System.nanoTime()-startTime;
+
+			System.out.println("Found " + Integer.toString(similar_words.length) + " similar words in " + Long.toString(timeUsed/1000) + " us");
 			if (similar_words.length > 0)
 			{
 				System.out.println("Suggested similar words: ");
@@ -278,19 +387,12 @@ class Dictionary
 	private String[] findSimilar(String word)
 	{
 		ArrayList<String> similar_words_list = new ArrayList<>();
+		// Add all similar words
 		similar_words_list.addAll(findSimilarSwappedNextToEachother(word));
 		similar_words_list.addAll(findSimilarReplacedOneLetter(word));
 		similar_words_list.addAll(findSimilarRemovedOneLetter(word));
 		similar_words_list.addAll(findSimilarAddedOneLetter(word));
 		String[] similar_words = (String[]) similar_words_list.toArray(new String[0]);
-		/* Magic solution with the new String[0]
-		
-		System.out.println("Printing similiar words:");
-		for (int i = 0; i<similar_words.length; i++) 
-		{
-			System.out.println(similar_words[i]);
-		}
-		*/
 		return search(similar_words);
 	}
 
