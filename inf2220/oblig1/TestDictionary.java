@@ -2,7 +2,42 @@ import java.util.Scanner;
 import java.io.File;
 import java.util.*;
 
-public class BinarySearchTree<T extends Comparable<? super T>>
+public class TestDictionary
+{
+	public static void main(String[] args)
+	{
+		String filename = args[0];
+		dict = new Dictionary(filename);
+		// To fulfill special requirement to remove and insert a word.
+		dict.oblig1init();
+		run();
+	}
+
+	static Dictionary dict;
+
+	public static void run()
+	{
+		Scanner sc = new Scanner(System.in);
+		System.out.println("This is a dictionary. You will be prompted to enter words, and those words will be spell-checked. If you mistype a word, and it is reasonably similar to a word in the dictionary, you will be provided with suggestions for correct words. Exit the program by typing \"q\" \nTo start the program, type \"s\" and press enter, to quit, type anything else and press enter:");
+		String s = sc.next();
+		if (s.compareTo("s") != 0)
+		{
+			System.out.println("Quitting...");
+			System.exit(0);
+		}
+		while (true)
+		{	
+			System.out.println("Enter a word: ");
+			String word = sc.next();
+			if (word.compareTo("q")==0)
+				System.exit(0);
+			boolean isFound = dict.search(word);
+			System.out.println("-----------------------------------");
+		}
+	}
+}
+
+class BinarySearchTree<T extends Comparable<? super T>>
 {
 	private static class BinaryNode<T>
 	{
@@ -273,40 +308,6 @@ public class BinarySearchTree<T extends Comparable<? super T>>
 	}
 }
 
-class TestDictionary
-{
-	public static void main(String[] args)
-	{
-		String filename = args[0];
-		dict = new Dictionary(filename);
-		// To fulfill special requirement to remove and insert a word.
-		dict.oblig1init();
-		run();
-	}
-
-	static Dictionary dict;
-
-	public static void run()
-	{
-		Scanner sc = new Scanner(System.in);
-		System.out.println("This is a dictionary. You will be prompted to enter words, and those words will be spell-checked. If you mistype a word, and it is reasonably similar to a word in the dictionary, you will be provided with suggestions for correct words. Exit the program by typing \"q\" \nTo start the program, type \"s\" and press enter, to quit, type anything else and press enter:");
-		String s = sc.next();
-		if (s.compareTo("s") != 0)
-		{
-			System.out.println("Quitting...");
-			System.exit(0);
-		}
-		while (true)
-		{	
-			System.out.println("Enter a word: ");
-			String word = sc.next();
-			if (word.compareTo("q")==0)
-				System.exit(0);
-			boolean isFound = dict.search(word);
-			System.out.println("-----------------------------------");
-		}
-	}
-}
 
 class Dictionary
 {
