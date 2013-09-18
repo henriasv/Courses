@@ -25,16 +25,21 @@ public class BinarySearchTree<T extends Comparable<? super T>>
 		BinaryNode<T> right;
 	}
 
+	/** Utility class to do statistics
+	 * An instance of this class is passed through recursion when statistics about a binary three in obtained. 
+	 */
 	private class ThreeStatistics
 	{
+
 		ThreeStatistics()
 		{
 			depth = 0;
 			meanDepth = 0;
+			num_traversed = 0;
 			firstElement = null;
 			lastElement = null;
 			current_depth = 1;
-			nodesOnEachDepth = new int[size/10];
+			nodesOnEachDepth = new int[size/10]; // Magic size of array
 		}
 		// Data structure to carry statistics
 		int depth;
@@ -47,12 +52,14 @@ public class BinarySearchTree<T extends Comparable<? super T>>
 		int current_depth;
 		int max_depth;
 		int sum_depth;
+		int num_traversed;
 
 		public void deeper() {current_depth ++;}
 		public void shallower() {current_depth --;}
 		
 		public void stat()
 		{
+			num_traversed ++;
 			sum_depth += current_depth;
 			try
 			{
@@ -71,7 +78,7 @@ public class BinarySearchTree<T extends Comparable<? super T>>
 		public void update()
 		{
 			depth = max_depth;
-			meanDepth = (double)sum_depth/size;
+			meanDepth = (double) sum_depth/size;
 			firstElement = findMin();
 			lastElement = findMax();
 		}
@@ -127,7 +134,17 @@ public class BinarySearchTree<T extends Comparable<? super T>>
 		ThreeStatistics stat = statistics();
 		System.out.println("Statistics on binary tree: ");
 		System.out.println("Depth: " + Integer.toString(stat.depth));
-		System.out.println("meanDepth: " + Double.toString(stat.meanDepth));
+		System.out.println("Mean node depth: " + Double.toString(stat.meanDepth));
+		if (size == stat.num_traversed)
+		{
+			System.out.println("Number of nodes traversed is equal to the number of nodes registred in the binary tree: " + Integer.toString(size));
+		}
+		else
+		{
+			System.out.println("Number of nodes traversed is NOT equal to the number of nodes registred in the binary tree, \n Exiting!");
+			System.exit(1);
+		}
+		System.out.println("----------------------------------------------------------");
 	}
 
 	private BinaryNode<T> findMin(BinaryNode<T> t)
@@ -158,11 +175,6 @@ public class BinarySearchTree<T extends Comparable<? super T>>
 		}
 	}
 
-	/** Recursive function to find element in a subtree
-	 * @param x, item to be found
-	 * @param t, subtree to be checked
-	 * @return true if x if found, false otherwise
-	 */
 	private boolean contains(T x, BinaryNode<T> t)
 	{
 		if (t == null)
@@ -230,29 +242,33 @@ public class BinarySearchTree<T extends Comparable<? super T>>
 	{
 		ThreeStatistics stat = new ThreeStatistics();
 		BinaryNode<T> t = root;
-		traverse(t, stat);
+		traverseForStatistics(t, stat);
 		stat.update();
 		return stat;
 	}
 
-	private void traverse(BinaryNode<T> t, ThreeStatistics stat)
+	/**
+	 * Traverses the binary three and counts statistics, helped by the ThreStatistics object.
+	 */
+	private void traverseForStatistics(BinaryNode<T> t, ThreeStatistics stat)
 	{
 		stat.stat();
-		if (t.left!= null)
+		if (t.left != null)
 		{
-			t = t.left;
 			stat.deeper();
-			traverse(t, stat);
+			traverseForStatistics(t.left, stat);
 		}
-		else if (t.right != null)
+		if (t.right != null)
 		{
-			t = t.right;
 			stat.deeper();
-			traverse(t, stat);
+			traverseForStatistics(t.right, stat);
 		}
-		stat.statLeaf();
+
+		if (t.left == null && t.right==null) 
+		{
+			stat.statLeaf();
+		}
 		stat.shallower();
-		System.out.println(Integer.toString(stat.current_depth));
 		return;
 	}
 }
@@ -263,7 +279,7 @@ class TestDictionary
 	{
 		String filename = args[0];
 		dict = new Dictionary(filename);
-		//dict.print();
+		// To fulfill special requirement to remove and insert a word.
 		dict.oblig1init();
 		run();
 	}
@@ -273,6 +289,13 @@ class TestDictionary
 	public static void run()
 	{
 		Scanner sc = new Scanner(System.in);
+		System.out.println("This is a dictionary. You will be prompted to enter words, and those words will be spell-checked. If you mistype a word, and it is reasonably similar to a word in the dictionary, you will be provided with suggestions for correct words. Exit the program by typing \"q\" \nTo start the program, type \"s\" and press enter, to quit, type anything else and press enter:");
+		String s = sc.next();
+		if (s.compareTo("s") != 0)
+		{
+			System.out.println("Quitting...");
+			System.exit(0);
+		}
 		while (true)
 		{	
 			System.out.println("Enter a word: ");
@@ -298,7 +321,7 @@ class Dictionary
 	}
 
 	BinarySearchTree<String> tree;
-	String alphabet_string = "abcdefghijklmnopqrstuvwxyz";
+	String alphabet_string = "abcdefghijklmnopqrstuvwxyzæøå";
 	char[] alphabet = alphabet_string.toCharArray();
 
 	public void readFile(String filename)
@@ -392,7 +415,9 @@ class Dictionary
 		similar_words_list.addAll(findSimilarReplacedOneLetter(word));
 		similar_words_list.addAll(findSimilarRemovedOneLetter(word));
 		similar_words_list.addAll(findSimilarAddedOneLetter(word));
-		String[] similar_words = (String[]) similar_words_list.toArray(new String[0]);
+		// Oneliner to remove duplicates. This solution is somewhat arbitrary, and there should be a better way.
+		ArrayList<String> uniqueWords = new ArrayList<String>(new LinkedHashSet<String>(similar_words_list));
+		String[] similar_words = (String[]) uniqueWords.toArray(new String[0]);
 		return search(similar_words);
 	}
 
@@ -445,6 +470,8 @@ class Dictionary
 		return words;
 	}
 
+
+	// Below are utility functions, which support the findSimilar...something... methods.
 	private String swap(int i, int j, String s)
 	{
 		char[] word_array = s.toCharArray();
