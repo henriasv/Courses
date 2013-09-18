@@ -6,8 +6,25 @@ public class TestDictionary
 {
 	public static void main(String[] args)
 	{
-		String filename = args[0];
-		dict = new Dictionary(filename);
+		String filename = null;
+		try
+		{
+			filename = args[0];
+		}
+		catch (java.lang.ArrayIndexOutOfBoundsException e)
+		{
+			System.out.println("Please provide filepath for dictionary text file when starting the program");
+			System.exit(1);
+		}
+		try
+		{
+			dict = new Dictionary(filename);
+		}
+		catch (Exception e)
+		{
+			System.out.println("Dictionary file not found");
+			System.exit(1);
+		}
 		// To fulfill special requirement to remove and insert a word.
 		dict.oblig1init();
 		run();
