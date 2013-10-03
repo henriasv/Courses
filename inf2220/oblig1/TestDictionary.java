@@ -22,6 +22,7 @@ public class TestDictionary
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 			System.out.println("Dictionary file not found");
 			System.exit(1);
 		}
@@ -90,12 +91,12 @@ class BinarySearchTree<T extends Comparable<? super T>>
 			num_traversed = 0;
 			firstElement = null;
 			lastElement = null;
-			current_depth = 1;
-			nodesOnEachDepth = new int[size/10]; // Magic size of array
+			current_depth = 0;
+			nodesOnEachDepth = new ArrayList<Integer>(); // Magic size of array
 		}
 		// Data structure to carry statistics
 		int depth;
-		int[] nodesOnEachDepth;
+		ArrayList<Integer> nodesOnEachDepth;
 		double meanDepth;
 		T firstElement;
 		T lastElement;
@@ -115,10 +116,11 @@ class BinarySearchTree<T extends Comparable<? super T>>
 			sum_depth += current_depth;
 			try
 			{
-				nodesOnEachDepth[current_depth] ++;
+				nodesOnEachDepth.set(current_depth, nodesOnEachDepth.get(current_depth)+1);
 			} catch (IndexOutOfBoundsException e)
 			{
-				System.out.println("too deep");
+				nodesOnEachDepth.ensureCapacity(current_depth+1);
+				nodesOnEachDepth.add(current_depth, 1);
 			}
 		}
 		public void statLeaf()
@@ -187,6 +189,12 @@ class BinarySearchTree<T extends Comparable<? super T>>
 		System.out.println("Statistics on binary tree: ");
 		System.out.println("Depth: " + Integer.toString(stat.depth));
 		System.out.println("Mean node depth: " + Double.toString(stat.meanDepth));
+		System.out.println("Nodes on each depth:");
+		for (int i = 0; i<stat.nodesOnEachDepth.size(); i++)
+		{
+			System.out.print("\t"+Integer.toString(i)+":\t");
+			System.out.println(Integer.toString(stat.nodesOnEachDepth.get(i)));
+		}
 		if (size == stat.num_traversed)
 		{
 			System.out.println("Number of nodes traversed is equal to the number of nodes registred in the binary tree: " + Integer.toString(size));

@@ -1,49 +1,79 @@
-1x-193-157-192-91:oblig1 henriksveinsson$ java TestDictionary ordbok1_utf.txt
+henrik@henrik-OptiPlex-790:~/git_repos/Courses/inf2220/oblig1$ java TestDictionary ordbok1_utf.txt 
 Reading words from ordbok1_utf.txt
-Statistics on binary tree:
-Depth: 29
-Mean node depth: 16.403812460578877
+Statistics on binary tree: 
+Depth: 28
+Mean node depth: 15.403812460578877
+Nodes on each depth:
+	0:	1
+	1:	2
+	2:	4
+	3:	8
+	4:	16
+	5:	32
+	6:	62
+	7:	117
+	8:	201
+	9:	337
+	10:	532
+	11:	786
+	12:	1058
+	13:	1291
+	14:	1424
+	15:	1487
+	16:	1482
+	17:	1339
+	18:	1189
+	19:	942
+	20:	665
+	21:	482
+	22:	333
+	23:	219
+	24:	126
+	25:	71
+	26:	43
+	27:	16
+	28:	4
 Number of nodes traversed is equal to the number of nodes registred in the binary tree: 14269
 ----------------------------------------------------------
-This is a dictionary. You will be prompted to enter words, and those words will be spell-checked. If you mistype a word, and it is reasonably similar to a word in the dictionary, you will be provided with suggestions for correct words. Exit the program by typing "q"
+This is a dictionary. You will be prompted to enter words, and those words will be spell-checked. If you mistype a word, and it is reasonably similar to a word in the dictionary, you will be provided with suggestions for correct words. Exit the program by typing "q" 
 To start the program, type "s" and press enter, to quit, type anything else and press enter:
 s
-Enter a word:
+Enter a word: 
 etterfølger
 Found word: etterfølger
 -----------------------------------
-Enter a word:
+Enter a word: 
 eterfølger
 Word not found
-Found 1 similar words in 6318 us
-Suggested similar words:
+Found 1 similar words in 7179 us
+Suggested similar words: 
 etterfølger
 -----------------------------------
-Enter a word:
+Enter a word: 
 etterfolger
 Word not found
-Found 1 similar words in 5507 us
-Suggested similar words:
+Found 1 similar words in 5372 us
+Suggested similar words: 
 etterfølger
 -----------------------------------
-Enter a word:
+Enter a word: 
 etterfølgern
 Word not found
-Found 5 similar words in 7170 us
-Suggested similar words:
+Found 5 similar words in 5861 us
+Suggested similar words: 
 etterfølgere
 etterfølgers
 etterfølgeren
 etterfølgerne
 etterfølger
 -----------------------------------
-Enter a word:
+Enter a word: 
 tterfølger
 Word not found
-Found 1 similar words in 3725 us
-Suggested similar words:
+Found 1 similar words in 4133 us
+Suggested similar words: 
 etterfølger
 -----------------------------------
-Enter a word:
+Enter a word: 
 q
-1x-193-157-192-91:oblig1 henriksveinsson$
+
