@@ -30,7 +30,8 @@ class Task {
 	}
 
 	public defineFromString(String info) {
-
+		String task_data = info.split(" ");
+		#
 	}
 }
 
