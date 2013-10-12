@@ -1,0 +1,10 @@
+8
+
+1   Sette-opp-vegger  4 2       5       6       0
+2   Sette-opp-tak     6 4       1       0
+3   Klistre-tapet     1 2       1       2       0
+4   Legge-takstein    1 3       2       0
+5   Bygge-grunnmur    4 2       0
+6   Legge-gulv        2 2       5       3       0
+7   Legge-gulvbelegg  4 2       6       2       0
+8   Flytte-inn        4 4       3       7       0

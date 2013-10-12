@@ -1,0 +1,33 @@
+31
+
+1   MONTERE-FORTAUG-(ELEMENTER)  20  10         28      29      0
+2   MONTERE-REKKVERK-(ELEMENTER)  7  10         10      0
+3   MONTERE-BILLETTHUS            1  10         8       0
+4   MALE-TÅRN-1-MED-BUE-A        15   6         24      0
+5   MALE-TÅRN-2                  12   6         25      0
+6   MALE-FAGVERK                 27   6         28      29      0
+7   MALE-KABLER-OG-STAG          18   6         28      29      0
+8   LEGGE-VEIBANE-TUNELL-OG-SKJ  12   7         13      15      0
+9   OPPSETTING-ARBEIDSBRAKKE      3  10         0
+10  KLARGJØRING-LAGERPLASS        2   4         9       0
+11  RIGGE-BUKKEPLASS-ARMERING     1   4         9       0
+12  SKYTE-TUNNEL                 30  12         9       0
+13  RENSE-TUNNEL                 18  12         12      0
+14  SKYTE-SKJÆRING               25  12         9       0
+15  RENSE-SKJÆRING               20  12         14      0
+16  FUNDAMENT-SKYTES-TÅRN-1      35  12         9       0
+17  FUNDAMENT-SKYTES-TÅRN-2      45  12         9       0
+18  LAGE-ARMERING-TÅRN-1         40   4         11      0
+19  LAGE-ARMERING-TÅRN-2         25   4         11      0
+20  LAGE-ARMERING-BUE-A          12   4         11      0
+21  FORSKALE-OG-ARMERE-TÅRN-1    15   5         16      18      0
+22  FORSKALE-OG-ARMERE-TÅRN-2    16   5         17      19      0
+23  FORSKALE-OG-ARMERE-BUE-A     30   5         20      0
+24  STØPE-TÅRN-1                 60   7         21      0
+25  STØPE-TÅRN-2                 60   7         22      0
+26  STØPE-BUE-A                  20   7         23      0
+27  STREKKE-TO-HOVEDKABLER       25  10         24      25      0
+28  BYGGE-FAGVERK-1-MED-STAG     30  10         27      0
+29  BYGGE-FAGVERK-2-MED-STAG     37  10         27      0
+30  STØPE-VEIBANE-PÅ-FAGVERK     20   7         28      29      0
+31  PUSSE-VEIBANE-PÅ-BRO         12   7         30      26      8       0
