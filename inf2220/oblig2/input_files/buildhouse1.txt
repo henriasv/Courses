@@ -8,8 +8,3 @@
 6   Make-floor        	2 2       5       0
 7   Put-carpet-floor  	4 2       6       2       0
 8   Move-in        	4 4       3       7       0
-
-
-
-
-
