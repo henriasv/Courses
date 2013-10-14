@@ -9,6 +9,7 @@ class ProjectPlanner {
 		readFromFile(inFile, project);
 		project.sort();
 		project.printAllTasks();
+		project.printAllEdges();
 		project.run();
 		System.out.println("Ran program");
 	}
@@ -170,6 +171,10 @@ class Edge {
 		w.addPredecessor();
 	}
 	Task v, w;
+
+	public String toString() {
+		return Integer.toString(v.id) + " --> " Integer.toString(w.id);
+	}
 }
 
 class Project {
@@ -225,6 +230,12 @@ class Project {
 	public void printAllTasks() {
 		for (Task task : tasks) {
 			System.out.println(task.toString());
+		}
+	}
+
+	public void printAllEdges() {
+		for (Edge egde : edges) {
+			System.out.println(edge.toString());
 		}
 	}
 
