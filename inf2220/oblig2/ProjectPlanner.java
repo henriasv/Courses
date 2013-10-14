@@ -141,7 +141,7 @@ class Task implements Comparable<Task>{
 
 	public void start(int t) {
 		started_at = t;
-		System.out.println("Started task: " + Integer.toString(id));
+		System.out.println("Started: " + Integer.toString(id));
 	}
 
 	public boolean tell_finished_prerequisite(int t) {
@@ -279,7 +279,6 @@ class Project {
 		}
 		boolean finished = false;
 		while (true) {
-			System.out.println("t: " + Integer.toString(t));
 
 			ArrayList<Task> to_be_removed = new ArrayList<>();
 			ArrayList<Task> to_be_added = new ArrayList<>();
@@ -296,10 +295,27 @@ class Project {
 			}
 			active_tasks.removeAll(to_be_removed);
 			active_tasks.addAll(to_be_added);
-			if (active_tasks.size() == 0)
+			int current_staff = 0;
+
+			for (Task task:active_tasks) {
+				current_staff += task.staff;
+			}
+			System.out.println("Current staff: " + Integer.toString(current_staff));
+
+			if (active_tasks.size() == 0) {
+				for (Task task : tasks) {
+					if (task.finished_at == -1) {
+						System.out.println("Task " + Integer.toString(task.id) + " was not able to finish!");
+					}
+				}
 				break;
+			}
 			t ++;
+			System.out.println(" ");
+			System.out.println("t: " + Integer.toString(t));
+
 		}
+		System.out.println("*** Shortest possible execution time is " + Integer.toString(t) + " ***");
 	}
 
 	private ArrayList<Task> findTaskWithIndegreeZero() {
