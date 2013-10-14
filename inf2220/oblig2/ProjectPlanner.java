@@ -170,10 +170,11 @@ class Edge {
 		this.w = w;
 		w.addPredecessor();
 	}
+
 	Task v, w;
 
 	public String toString() {
-		return Integer.toString(v.id) + " --> " Integer.toString(w.id);
+		return Integer.toString(v.id) + " --> " + Integer.toString(w.id);
 	}
 }
 
@@ -234,7 +235,7 @@ class Project {
 	}
 
 	public void printAllEdges() {
-		for (Edge egde : edges) {
+		for (Edge edge : edges) {
 			System.out.println(edge.toString());
 		}
 	}
