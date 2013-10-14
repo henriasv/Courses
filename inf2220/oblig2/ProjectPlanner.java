@@ -95,6 +95,11 @@ class Task implements Comparable<Task>{
 	int latestStart = -1;
 	int slack = -1;
 
+	// To be used in graph algorithm
+	int started_at = -1;
+	int finished_at = -1;
+	int finished_predecessors = 0;
+
 	public void addPredecessor() {
 		cntPredecessors ++;
 	}
@@ -132,6 +137,30 @@ class Task implements Comparable<Task>{
 				project.addEdge(tmp_e);
 			}
 		}
+	}
+
+	public void start(int t) {
+		started_at = t;
+		System.out.println("Started task: " + Integer.toString(id));
+	}
+
+	public boolean tell_finished_prerequisite(int t) {
+		finished_predecessors ++;
+		if (finished_predecessors == cntPredecessors) {
+			start(t);
+			return true;
+		}
+		return false;
+	}
+
+	public boolean isFinished(int t) {
+		if (t-(started_at+time)==0) {
+			finished_at = t;
+			System.out.println("Finished: " + Integer.toString(id));
+			return true;
+		}
+		else 
+			return false;
 	}
 
 	public boolean equals(Object other) {
@@ -242,11 +271,34 @@ class Project {
 
 	public void run() {
 		int t = 0;
-		ArrayList<Task> begin_tasks = findTaskWithIndegreeZero();
+		ArrayList<Task> active_tasks = findTaskWithIndegreeZero();
 		System.out.println("---------------- Starting project from");
-		for (Task task : begin_tasks) {
+		for (Task task : active_tasks) {
 			System.out.println(task.toString());
+			task.start(t);
+		}
+		boolean finished = false;
+		while (true) {
+			System.out.println("t: " + Integer.toString(t));
 
+			ArrayList<Task> to_be_removed = new ArrayList<>();
+			ArrayList<Task> to_be_added = new ArrayList<>();
+			for (Task task : active_tasks) {
+
+				if (task.isFinished(t)) {
+					for (Edge edge : task.outEdges) {
+						if(edge.w.tell_finished_prerequisite(t)) {
+							to_be_added.add(edge.w);
+						}
+					}
+					to_be_removed.add(task);
+				}
+			}
+			active_tasks.removeAll(to_be_removed);
+			active_tasks.addAll(to_be_added);
+			if (active_tasks.size() == 0)
+				break;
+			t ++;
 		}
 	}
 
