@@ -7,7 +7,9 @@ class ProjectPlanner {
 		Project project = new Project();
 		File inFile = new File(args[0]);
 		readFromFile(inFile, project);
+		project.sort();
 		project.printAllTasks();
+		project.run();
 		System.out.println("Ran program");
 	}
 
@@ -44,23 +46,23 @@ class ProjectPlanner {
 			String[] tmp_string = {};
 			tmp_string =  tmp_string_arr.toArray(tmp_string);
 
-			int id = 0;
+			int id = -1;
 
 			try {
 				id = Integer.parseInt(tmp_string[0]);
 			}
 			catch (java.lang.NumberFormatException e) {
-				id = 0; // Will not make new task
+				id = -1; // Will not make new task
 			}
 			catch (java.lang.ArrayIndexOutOfBoundsException e) {
-				id = 0;
+				id = -1;
 			}
 
 			if (id == counter) {
 				String name = tmp_string[1];
 				int time 	= Integer.parseInt(tmp_string[2]);
 				int staff 	= Integer.parseInt(tmp_string[3]);
-				int[] dependencies = new int[tmp_string.length-3];
+				int[] dependencies = new int[tmp_string.length-4];
 				for (int i = 4; i<tmp_string.length; i++)
 					dependencies[i-4] = Integer.parseInt(tmp_string[i]);
 				project.addTask(id, name, time, staff, dependencies);
@@ -74,7 +76,7 @@ class ProjectPlanner {
 	static int num_tasks = 0;
 }
 
-class Task {
+class Task implements Comparable<Task>{
 
 	Task(int id, Project project) {
 		this.id = id;
@@ -86,6 +88,11 @@ class Task {
 	ArrayList<Edge> outEdges = new ArrayList<>();
 	int cntPredecessors;
 	Project project;
+
+	// To be calculated later
+	int earliestStart = -1;
+	int latestStart = -1;
+	int slack = -1;
 
 	public void addPredecessor() {
 		cntPredecessors ++;
@@ -110,34 +117,47 @@ class Task {
 		this.time = time;
 		this.staff = staff;
 		for (int id : dependencies) {
-			if (project.tasks.contains(new Task(id, project))) {
-				Edge tmp = new Edge(this, project.getTask(new Task(id, project)));
-				project.addEdge(tmp);
-				this.addEdge(tmp);
+			if (project.tasks.contains(new Task(id, project)) && (id != -1)) {
+				Task tmp_t = project.getTask(new Task(id, project));
+				Edge tmp_e = new Edge(tmp_t, this);
+				project.addEdge(tmp_e);
+				tmp_t.addEdge(tmp_e);
 			}
 			else {
 				Task tmp_t = new Task(id, project);
 				project.addTask(tmp_t);
-				Edge tmp_e = new Edge(this, tmp_t);
-				this.addEdge(tmp_e);
+				Edge tmp_e = new Edge(tmp_t, this);
+				tmp_t.addEdge(tmp_e);
 				project.addEdge(tmp_e);
 			}
 		}
 	}
 
-	public boolean equals(Task other) {
-		return (this.id == other.id);
+	public boolean equals(Object other) {
+		if (getClass() != other.getClass())
+			return false;
+		else
+			return (this.id == ((Task) other).id);
 	}
+
+	public int compareTo(Task other) {
+		return this.id-other.id;
+	}
+
+
 
 	public String toString() {
 		String ret = 	"Id: "+ Integer.toString(id) +
 						"\nName: " + name +
 						"\ntime: " + Integer.toString(time) + 
+						"\nslack: " + Integer.toString(slack) +
 						"\nstaff: " + Integer.toString(staff) +
-						"\ndependencies: ";
+						"\noutEdges to: ";
+						
 		for (Edge edge : outEdges) {
 			ret = ret + Integer.toString(edge.w.id) + " ";
 		}
+		ret = ret + "\nnum_predecessors: " + Integer.toString(cntPredecessors);
 		return ret;
 	}
 
@@ -156,7 +176,7 @@ class Project {
 	Project() {
 	}
 
-	ArrayList<Task>  tasks = new ArrayList<>();
+	ArrayList<Task> tasks = new ArrayList<>();
 	ArrayList<Edge> edges = new ArrayList<>();
 
 	private void readFromFile(String filename) {
@@ -198,9 +218,33 @@ class Project {
 		return tasks.size();
 	}
 
+	public void sort() {
+		Collections.sort(tasks);
+	}
+
 	public void printAllTasks() {
 		for (Task task : tasks) {
 			System.out.println(task.toString());
 		}
+	}
+
+	public void run() {
+		int t = 0;
+		ArrayList<Task> begin_tasks = findTaskWithIndegreeZero();
+		System.out.println("---------------- Starting project from");
+		for (Task task : begin_tasks) {
+			System.out.println(task.toString());
+
+		}
+	}
+
+	private ArrayList<Task> findTaskWithIndegreeZero() {
+		ArrayList<Task> ret = new ArrayList<>();
+		for (Task task : tasks) {
+			if (task.cntPredecessors == 0) {
+				ret.add(task);
+			}
+		}
+		return ret;
 	}
 }
