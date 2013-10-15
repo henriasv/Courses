@@ -1,1 +1,1 @@
-#
+If a node has indegree zero, it is started right away. Therefore, if there are no cycles in a project, it is realizeable

@@ -63,8 +63,8 @@ class ProjectPlanner {
 				String name = tmp_string[1];
 				int time 	= Integer.parseInt(tmp_string[2]);
 				int staff 	= Integer.parseInt(tmp_string[3]);
-				int[] dependencies = new int[tmp_string.length-4];
-				for (int i = 4; i<tmp_string.length; i++)
+				int[] dependencies = new int[tmp_string.length-5];
+				for (int i = 4; i<tmp_string.length-1; i++)
 					dependencies[i-4] = Integer.parseInt(tmp_string[i]);
 				project.addTask(id, name, time, staff, dependencies);
 				System.out.println("Created new task");
@@ -316,6 +316,11 @@ class Project {
 
 		}
 		System.out.println("*** Shortest possible execution time is " + Integer.toString(t) + " ***");
+	}
+
+	private void checkRealizeable() {
+		// By Realizeable, we mean no cycles
+
 	}
 
 	private ArrayList<Task> findTaskWithIndegreeZero() {
