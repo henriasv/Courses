@@ -100,6 +100,9 @@ class Task implements Comparable<Task>{
 	int finished_at = -1;
 	int finished_predecessors = 0;
 
+	// To be used by Tarjans Algorithm 
+	boolean on_stack = false;
+
 	public void addPredecessor() {
 		cntPredecessors ++;
 	}
@@ -270,6 +273,11 @@ class Project {
 	}
 
 	public void run() {
+		if (!checkRealizeable()){
+			System.out.println("Project is not realizeable, quitting");
+			System.exit(1);
+		}
+
 		int t = 0;
 		ArrayList<Task> active_tasks = findTaskWithIndegreeZero();
 		System.out.println("---------------- Starting project from");
@@ -318,9 +326,31 @@ class Project {
 		System.out.println("*** Shortest possible execution time is " + Integer.toString(t) + " ***");
 	}
 
-	private void checkRealizeable() {
+	// A limited implementation of Tarjans algorithm. Does not collect strongly connected areas, but returns false if any cycle is found.
+	private boolean checkRealizeable() {
 		// By Realizeable, we mean no cycles
+		ArrayList<Task> start_tasks = findTaskWithIndegreeZero();
+		for (Task task : start_tasks) {
+			if (!iterateTask(task)) {
+				return false;
+			}
+		}
+		return true;
+	}
 
+	private boolean iterateTask(Task task) {
+		if (task.on_stack) {
+			System.out.println("Identified cycle containing task: " + Integer.toString(task.id));
+			return false;
+		}
+		task.on_stack = true;
+		for (Edge edge : task.outEdges) {
+			boolean retval = iterateTask(edge.w);
+			task.on_stack = false;
+			return retval;
+		}
+		task.on_stack = false;
+		return true;
 	}
 
 	private ArrayList<Task> findTaskWithIndegreeZero() {
