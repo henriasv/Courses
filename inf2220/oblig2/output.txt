@@ -1,0 +1,1318 @@
+>> java ProjectPlanner input_files/buildhouse1.txt 999 >> output.txt
+
+Using unlimited manpower
+Number of tasks: 8
+
+
+1,Build-walls,4,2,5,0,
+Created new task
+2,Build-roofs,6,4,1,0,
+Created new task
+3,Put-on-wallpapers,1,2,1,2,0,
+Created new task
+4,Put-on-tiles,1,3,2,0,
+Created new task
+5,Build-foundation,4,2,0,
+Created new task
+6,Make-floor,2,2,5,0,
+Created new task
+7,Put-carpet-floor,4,2,6,2,0,
+Created new task
+8,Move-in,4,4,3,7,0,
+Created new task
+5 --> 1
+1 --> 2
+1 --> 3
+2 --> 3
+2 --> 4
+5 --> 6
+6 --> 7
+2 --> 7
+3 --> 8
+7 --> 8
+---------------- Starting project from
+----------------TASK------------------
+Id: 5
+Name: Build-foundation
+time: 4
+staff: 2
+slack: -1
+Latest starting time: -1
+dependants: 1 6 
+Started: 5
+Current staff: 2
+ 
+t: 1
+Current staff: 2
+ 
+t: 2
+Current staff: 2
+ 
+t: 3
+Current staff: 2
+ 
+t: 4
+Finished: 5
+Started: 1
+Started: 6
+Current staff: 4
+ 
+t: 5
+Current staff: 4
+ 
+t: 6
+Finished: 6
+Current staff: 2
+ 
+t: 7
+Current staff: 2
+ 
+t: 8
+Finished: 1
+Started: 2
+Current staff: 4
+ 
+t: 9
+Current staff: 4
+ 
+t: 10
+Current staff: 4
+ 
+t: 11
+Current staff: 4
+ 
+t: 12
+Current staff: 4
+ 
+t: 13
+Current staff: 4
+ 
+t: 14
+Finished: 2
+Started: 3
+Started: 4
+Started: 7
+Current staff: 7
+ 
+t: 15
+Finished: 3
+Finished: 4
+Current staff: 2
+ 
+t: 16
+Current staff: 2
+ 
+t: 17
+Current staff: 2
+ 
+t: 18
+Finished: 7
+Started: 8
+Current staff: 4
+ 
+t: 19
+Current staff: 4
+ 
+t: 20
+Current staff: 4
+ 
+t: 21
+Current staff: 4
+ 
+t: 22
+Finished: 8
+Current staff: 0
+*** Shortest possible execution time is 22 ***
+----------------TASK------------------
+Id: 1
+Name: Build-walls
+time: 4
+staff: 2
+slack: 0
+Latest starting time: 4
+dependants: 2 3 
+----------------TASK------------------
+Id: 2
+Name: Build-roofs
+time: 6
+staff: 4
+slack: 0
+Latest starting time: 8
+dependants: 3 4 7 
+----------------TASK------------------
+Id: 3
+Name: Put-on-wallpapers
+time: 1
+staff: 2
+slack: 3
+Latest starting time: 17
+dependants: 8 
+----------------TASK------------------
+Id: 4
+Name: Put-on-tiles
+time: 1
+staff: 3
+slack: 7
+Latest starting time: 21
+dependants: 
+----------------TASK------------------
+Id: 5
+Name: Build-foundation
+time: 4
+staff: 2
+slack: 0
+Latest starting time: 0
+dependants: 1 6 
+----------------TASK------------------
+Id: 6
+Name: Make-floor
+time: 2
+staff: 2
+slack: 8
+Latest starting time: 12
+dependants: 7 
+----------------TASK------------------
+Id: 7
+Name: Put-carpet-floor
+time: 4
+staff: 2
+slack: 0
+Latest starting time: 14
+dependants: 8 
+----------------TASK------------------
+Id: 8
+Name: Move-in
+time: 4
+staff: 4
+slack: 0
+Latest starting time: 18
+dependants: 
+Using unlimited manpower
+Number of tasks: 8
+
+******************************************************************************
+
+** END OUTPUT
+
+
+******************************************************************************
+>> java ProjectPlanner input_files/buildhouse2.txt 999 >> output.txt
+
+1,Build-walls,4,2,5,6,0,
+Created new task
+2,Build-roofs,6,4,1,0,
+Created new task
+3,Put-on-wallpapers,1,2,1,2,0,
+Created new task
+4,Put-on-tiles,1,3,2,0,
+Created new task
+5,Build-foundation,4,2,0,
+Created new task
+6,Make-floor,2,2,5,3,0,
+Created new task
+7,Put-carpet-floor,4,2,6,2,0,
+Created new task
+8,Move-in,4,4,3,7,0,
+Created new task
+5 --> 1
+6 --> 1
+1 --> 2
+1 --> 3
+2 --> 3
+2 --> 4
+5 --> 6
+3 --> 6
+6 --> 7
+2 --> 7
+3 --> 8
+7 --> 8
+Identified cycle containing task: 1
+Project is not realizeable, quitting
+Using unlimited manpower
+Number of tasks: 31
+
+***********************************************************************
+
+** END OUTPUT
+
+***********************************************************************
+
+>> java ProjectPlanner input_files/buildrail.txt 999 >> output.txt
+
+1,Install-pavement,20,10,28,29,0,
+Created new task
+2,Install-railing,7,10,10,0,
+Created new task
+3,Install-ticketmachine,1,10,8,0,
+Created new task
+4,Paint-tower-1-with-arch,15,6,24,0,
+Created new task
+5,Paint-tower-2,12,6,25,0,
+Created new task
+6,Paint-trusses,27,6,28,29,0,
+Created new task
+7,Paint-cables-and-rods,18,6,28,29,0,
+Created new task
+8,Put-lane-tunnel-and-intersection,12,7,13,15,0,
+Created new task
+9,Setup-barrack,3,10,0,
+Created new task
+10,Prepare-storage,2,4,9,0,
+Created new task
+11,Rig-ramspace-reinforcing,1,4,9,0,
+Created new task
+12,Build-tunnel,30,12,9,0,
+Created new task
+13,Clean-tunnel,18,12,12,0,
+Created new task
+14,Build-intersection,25,12,9,0,
+Created new task
+15,Clean-intersection,20,12,14,0,
+Created new task
+16,Build-towerfoundation-1,35,12,9,0,
+Created new task
+17,Build-towerfoundation-2,45,12,9,0,
+Created new task
+18,Make-armouring-tower-1,40,4,11,0,
+Created new task
+19,Make-armouring-tower-2,25,4,11,0,
+Created new task
+20,Make-armouring-arch,12,4,11,0,
+Created new task
+21,Encase-and-armour-tower-1,15,5,16,18,0,
+Created new task
+22,Encase-and-armour-tower-2,16,5,17,19,0,
+Created new task
+23,Encase-and-armour-arch,30,5,20,0,
+Created new task
+24,Cast-tower-1,60,7,21,0,
+Created new task
+25,Cast-tower-2,60,7,22,0,
+Created new task
+26,Cast-arch,20,7,23,0,
+Created new task
+27,Stretch-two-maincables,25,10,24,25,0,
+Created new task
+28,Build-truss-1-with-rods,30,10,27,0,
+Created new task
+29,Build-truss-2-with-rods,37,10,27,0,
+Created new task
+30,Cast-lane-on-truss,20,7,28,29,0,
+Created new task
+31,Polish-lane-on-arch,12,7,30,26,8,0,
+Created new task
+28 --> 1
+29 --> 1
+10 --> 2
+8 --> 3
+24 --> 4
+25 --> 5
+28 --> 6
+29 --> 6
+28 --> 7
+29 --> 7
+13 --> 8
+15 --> 8
+9 --> 10
+9 --> 11
+9 --> 12
+12 --> 13
+9 --> 14
+14 --> 15
+9 --> 16
+9 --> 17
+11 --> 18
+11 --> 19
+11 --> 20
+16 --> 21
+18 --> 21
+17 --> 22
+19 --> 22
+20 --> 23
+21 --> 24
+22 --> 25
+23 --> 26
+24 --> 27
+25 --> 27
+27 --> 28
+27 --> 29
+28 --> 30
+29 --> 30
+30 --> 31
+26 --> 31
+8 --> 31
+---------------- Starting project from
+----------------TASK------------------
+Id: 9
+Name: Setup-barrack
+time: 3
+staff: 10
+slack: -1
+Latest starting time: -1
+dependants: 10 11 12 14 16 17 
+Started: 9
+Current staff: 10
+ 
+t: 1
+Current staff: 10
+ 
+t: 2
+Current staff: 10
+ 
+t: 3
+Finished: 9
+Started: 10
+Started: 11
+Started: 12
+Started: 14
+Started: 16
+Started: 17
+Current staff: 56
+ 
+t: 4
+Finished: 11
+Started: 18
+Started: 19
+Started: 20
+Current staff: 64
+ 
+t: 5
+Finished: 10
+Started: 2
+Current staff: 70
+ 
+t: 6
+Current staff: 70
+ 
+t: 7
+Current staff: 70
+ 
+t: 8
+Current staff: 70
+ 
+t: 9
+Current staff: 70
+ 
+t: 10
+Current staff: 70
+ 
+t: 11
+Current staff: 70
+ 
+t: 12
+Finished: 2
+Current staff: 60
+ 
+t: 13
+Current staff: 60
+ 
+t: 14
+Current staff: 60
+ 
+t: 15
+Current staff: 60
+ 
+t: 16
+Finished: 20
+Started: 23
+Current staff: 61
+ 
+t: 17
+Current staff: 61
+ 
+t: 18
+Current staff: 61
+ 
+t: 19
+Current staff: 61
+ 
+t: 20
+Current staff: 61
+ 
+t: 21
+Current staff: 61
+ 
+t: 22
+Current staff: 61
+ 
+t: 23
+Current staff: 61
+ 
+t: 24
+Current staff: 61
+ 
+t: 25
+Current staff: 61
+ 
+t: 26
+Current staff: 61
+ 
+t: 27
+Current staff: 61
+ 
+t: 28
+Finished: 14
+Started: 15
+Current staff: 61
+ 
+t: 29
+Finished: 19
+Current staff: 57
+ 
+t: 30
+Current staff: 57
+ 
+t: 31
+Current staff: 57
+ 
+t: 32
+Current staff: 57
+ 
+t: 33
+Finished: 12
+Started: 13
+Current staff: 57
+ 
+t: 34
+Current staff: 57
+ 
+t: 35
+Current staff: 57
+ 
+t: 36
+Current staff: 57
+ 
+t: 37
+Current staff: 57
+ 
+t: 38
+Finished: 16
+Current staff: 45
+ 
+t: 39
+Current staff: 45
+ 
+t: 40
+Current staff: 45
+ 
+t: 41
+Current staff: 45
+ 
+t: 42
+Current staff: 45
+ 
+t: 43
+Current staff: 45
+ 
+t: 44
+Finished: 18
+Started: 21
+Current staff: 46
+ 
+t: 45
+Current staff: 46
+ 
+t: 46
+Finished: 23
+Started: 26
+Current staff: 48
+ 
+t: 47
+Current staff: 48
+ 
+t: 48
+Finished: 17
+Started: 22
+Finished: 15
+Current staff: 29
+ 
+t: 49
+Current staff: 29
+ 
+t: 50
+Current staff: 29
+ 
+t: 51
+Finished: 13
+Started: 8
+Current staff: 24
+ 
+t: 52
+Current staff: 24
+ 
+t: 53
+Current staff: 24
+ 
+t: 54
+Current staff: 24
+ 
+t: 55
+Current staff: 24
+ 
+t: 56
+Current staff: 24
+ 
+t: 57
+Current staff: 24
+ 
+t: 58
+Current staff: 24
+ 
+t: 59
+Finished: 21
+Started: 24
+Current staff: 26
+ 
+t: 60
+Current staff: 26
+ 
+t: 61
+Current staff: 26
+ 
+t: 62
+Current staff: 26
+ 
+t: 63
+Finished: 8
+Started: 3
+Current staff: 29
+ 
+t: 64
+Finished: 22
+Started: 25
+Finished: 3
+Current staff: 21
+ 
+t: 65
+Current staff: 21
+ 
+t: 66
+Finished: 26
+Current staff: 14
+ 
+t: 67
+Current staff: 14
+ 
+t: 68
+Current staff: 14
+ 
+t: 69
+Current staff: 14
+ 
+t: 70
+Current staff: 14
+ 
+t: 71
+Current staff: 14
+ 
+t: 72
+Current staff: 14
+ 
+t: 73
+Current staff: 14
+ 
+t: 74
+Current staff: 14
+ 
+t: 75
+Current staff: 14
+ 
+t: 76
+Current staff: 14
+ 
+t: 77
+Current staff: 14
+ 
+t: 78
+Current staff: 14
+ 
+t: 79
+Current staff: 14
+ 
+t: 80
+Current staff: 14
+ 
+t: 81
+Current staff: 14
+ 
+t: 82
+Current staff: 14
+ 
+t: 83
+Current staff: 14
+ 
+t: 84
+Current staff: 14
+ 
+t: 85
+Current staff: 14
+ 
+t: 86
+Current staff: 14
+ 
+t: 87
+Current staff: 14
+ 
+t: 88
+Current staff: 14
+ 
+t: 89
+Current staff: 14
+ 
+t: 90
+Current staff: 14
+ 
+t: 91
+Current staff: 14
+ 
+t: 92
+Current staff: 14
+ 
+t: 93
+Current staff: 14
+ 
+t: 94
+Current staff: 14
+ 
+t: 95
+Current staff: 14
+ 
+t: 96
+Current staff: 14
+ 
+t: 97
+Current staff: 14
+ 
+t: 98
+Current staff: 14
+ 
+t: 99
+Current staff: 14
+ 
+t: 100
+Current staff: 14
+ 
+t: 101
+Current staff: 14
+ 
+t: 102
+Current staff: 14
+ 
+t: 103
+Current staff: 14
+ 
+t: 104
+Current staff: 14
+ 
+t: 105
+Current staff: 14
+ 
+t: 106
+Current staff: 14
+ 
+t: 107
+Current staff: 14
+ 
+t: 108
+Current staff: 14
+ 
+t: 109
+Current staff: 14
+ 
+t: 110
+Current staff: 14
+ 
+t: 111
+Current staff: 14
+ 
+t: 112
+Current staff: 14
+ 
+t: 113
+Current staff: 14
+ 
+t: 114
+Current staff: 14
+ 
+t: 115
+Current staff: 14
+ 
+t: 116
+Current staff: 14
+ 
+t: 117
+Current staff: 14
+ 
+t: 118
+Current staff: 14
+ 
+t: 119
+Finished: 24
+Started: 4
+Current staff: 13
+ 
+t: 120
+Current staff: 13
+ 
+t: 121
+Current staff: 13
+ 
+t: 122
+Current staff: 13
+ 
+t: 123
+Current staff: 13
+ 
+t: 124
+Finished: 25
+Started: 5
+Started: 27
+Current staff: 22
+ 
+t: 125
+Current staff: 22
+ 
+t: 126
+Current staff: 22
+ 
+t: 127
+Current staff: 22
+ 
+t: 128
+Current staff: 22
+ 
+t: 129
+Current staff: 22
+ 
+t: 130
+Current staff: 22
+ 
+t: 131
+Current staff: 22
+ 
+t: 132
+Current staff: 22
+ 
+t: 133
+Current staff: 22
+ 
+t: 134
+Finished: 4
+Current staff: 16
+ 
+t: 135
+Current staff: 16
+ 
+t: 136
+Finished: 5
+Current staff: 10
+ 
+t: 137
+Current staff: 10
+ 
+t: 138
+Current staff: 10
+ 
+t: 139
+Current staff: 10
+ 
+t: 140
+Current staff: 10
+ 
+t: 141
+Current staff: 10
+ 
+t: 142
+Current staff: 10
+ 
+t: 143
+Current staff: 10
+ 
+t: 144
+Current staff: 10
+ 
+t: 145
+Current staff: 10
+ 
+t: 146
+Current staff: 10
+ 
+t: 147
+Current staff: 10
+ 
+t: 148
+Current staff: 10
+ 
+t: 149
+Finished: 27
+Started: 28
+Started: 29
+Current staff: 20
+ 
+t: 150
+Current staff: 20
+ 
+t: 151
+Current staff: 20
+ 
+t: 152
+Current staff: 20
+ 
+t: 153
+Current staff: 20
+ 
+t: 154
+Current staff: 20
+ 
+t: 155
+Current staff: 20
+ 
+t: 156
+Current staff: 20
+ 
+t: 157
+Current staff: 20
+ 
+t: 158
+Current staff: 20
+ 
+t: 159
+Current staff: 20
+ 
+t: 160
+Current staff: 20
+ 
+t: 161
+Current staff: 20
+ 
+t: 162
+Current staff: 20
+ 
+t: 163
+Current staff: 20
+ 
+t: 164
+Current staff: 20
+ 
+t: 165
+Current staff: 20
+ 
+t: 166
+Current staff: 20
+ 
+t: 167
+Current staff: 20
+ 
+t: 168
+Current staff: 20
+ 
+t: 169
+Current staff: 20
+ 
+t: 170
+Current staff: 20
+ 
+t: 171
+Current staff: 20
+ 
+t: 172
+Current staff: 20
+ 
+t: 173
+Current staff: 20
+ 
+t: 174
+Current staff: 20
+ 
+t: 175
+Current staff: 20
+ 
+t: 176
+Current staff: 20
+ 
+t: 177
+Current staff: 20
+ 
+t: 178
+Current staff: 20
+ 
+t: 179
+Finished: 28
+Current staff: 10
+ 
+t: 180
+Current staff: 10
+ 
+t: 181
+Current staff: 10
+ 
+t: 182
+Current staff: 10
+ 
+t: 183
+Current staff: 10
+ 
+t: 184
+Current staff: 10
+ 
+t: 185
+Current staff: 10
+ 
+t: 186
+Finished: 29
+Started: 1
+Started: 6
+Started: 7
+Started: 30
+Current staff: 29
+ 
+t: 187
+Current staff: 29
+ 
+t: 188
+Current staff: 29
+ 
+t: 189
+Current staff: 29
+ 
+t: 190
+Current staff: 29
+ 
+t: 191
+Current staff: 29
+ 
+t: 192
+Current staff: 29
+ 
+t: 193
+Current staff: 29
+ 
+t: 194
+Current staff: 29
+ 
+t: 195
+Current staff: 29
+ 
+t: 196
+Current staff: 29
+ 
+t: 197
+Current staff: 29
+ 
+t: 198
+Current staff: 29
+ 
+t: 199
+Current staff: 29
+ 
+t: 200
+Current staff: 29
+ 
+t: 201
+Current staff: 29
+ 
+t: 202
+Current staff: 29
+ 
+t: 203
+Current staff: 29
+ 
+t: 204
+Finished: 7
+Current staff: 23
+ 
+t: 205
+Current staff: 23
+ 
+t: 206
+Finished: 1
+Finished: 30
+Started: 31
+Current staff: 13
+ 
+t: 207
+Current staff: 13
+ 
+t: 208
+Current staff: 13
+ 
+t: 209
+Current staff: 13
+ 
+t: 210
+Current staff: 13
+ 
+t: 211
+Current staff: 13
+ 
+t: 212
+Current staff: 13
+ 
+t: 213
+Finished: 6
+Current staff: 7
+ 
+t: 214
+Current staff: 7
+ 
+t: 215
+Current staff: 7
+ 
+t: 216
+Current staff: 7
+ 
+t: 217
+Current staff: 7
+ 
+t: 218
+Finished: 31
+Current staff: 0
+*** Shortest possible execution time is 218 ***
+----------------TASK------------------
+Id: 1
+Name: Install-pavement
+time: 20
+staff: 10
+slack: 12
+Latest starting time: 198
+dependants: 
+----------------TASK------------------
+Id: 2
+Name: Install-railing
+time: 7
+staff: 10
+slack: 206
+Latest starting time: 211
+dependants: 
+----------------TASK------------------
+Id: 3
+Name: Install-ticketmachine
+time: 1
+staff: 10
+slack: 154
+Latest starting time: 217
+dependants: 
+----------------TASK------------------
+Id: 4
+Name: Paint-tower-1-with-arch
+time: 15
+staff: 6
+slack: 84
+Latest starting time: 203
+dependants: 
+----------------TASK------------------
+Id: 5
+Name: Paint-tower-2
+time: 12
+staff: 6
+slack: 82
+Latest starting time: 206
+dependants: 
+----------------TASK------------------
+Id: 6
+Name: Paint-trusses
+time: 27
+staff: 6
+slack: 5
+Latest starting time: 191
+dependants: 
+----------------TASK------------------
+Id: 7
+Name: Paint-cables-and-rods
+time: 18
+staff: 6
+slack: 14
+Latest starting time: 200
+dependants: 
+----------------TASK------------------
+Id: 8
+Name: Put-lane-tunnel-and-intersection
+time: 12
+staff: 7
+slack: 143
+Latest starting time: 194
+dependants: 3 31 
+----------------TASK------------------
+Id: 9
+Name: Setup-barrack
+time: 3
+staff: 10
+slack: 0
+Latest starting time: 0
+dependants: 10 11 12 14 16 17 
+----------------TASK------------------
+Id: 10
+Name: Prepare-storage
+time: 2
+staff: 4
+slack: 206
+Latest starting time: 209
+dependants: 2 
+----------------TASK------------------
+Id: 11
+Name: Rig-ramspace-reinforcing
+time: 1
+staff: 4
+slack: 5
+Latest starting time: 8
+dependants: 18 19 20 
+----------------TASK------------------
+Id: 12
+Name: Build-tunnel
+time: 30
+staff: 12
+slack: 143
+Latest starting time: 146
+dependants: 13 
+----------------TASK------------------
+Id: 13
+Name: Clean-tunnel
+time: 18
+staff: 12
+slack: 143
+Latest starting time: 176
+dependants: 8 
+----------------TASK------------------
+Id: 14
+Name: Build-intersection
+time: 25
+staff: 12
+slack: 146
+Latest starting time: 149
+dependants: 15 
+----------------TASK------------------
+Id: 15
+Name: Clean-intersection
+time: 20
+staff: 12
+slack: 146
+Latest starting time: 174
+dependants: 8 
+----------------TASK------------------
+Id: 16
+Name: Build-towerfoundation-1
+time: 35
+staff: 12
+slack: 11
+Latest starting time: 14
+dependants: 21 
+----------------TASK------------------
+Id: 17
+Name: Build-towerfoundation-2
+time: 45
+staff: 12
+slack: 0
+Latest starting time: 3
+dependants: 22 
+----------------TASK------------------
+Id: 18
+Name: Make-armouring-tower-1
+time: 40
+staff: 4
+slack: 5
+Latest starting time: 9
+dependants: 21 
+----------------TASK------------------
+Id: 19
+Name: Make-armouring-tower-2
+time: 25
+staff: 4
+slack: 19
+Latest starting time: 23
+dependants: 22 
+----------------TASK------------------
+Id: 20
+Name: Make-armouring-arch
+time: 12
+staff: 4
+slack: 140
+Latest starting time: 144
+dependants: 23 
+----------------TASK------------------
+Id: 21
+Name: Encase-and-armour-tower-1
+time: 15
+staff: 5
+slack: 5
+Latest starting time: 49
+dependants: 24 
+----------------TASK------------------
+Id: 22
+Name: Encase-and-armour-tower-2
+time: 16
+staff: 5
+slack: 0
+Latest starting time: 48
+dependants: 25 
+----------------TASK------------------
+Id: 23
+Name: Encase-and-armour-arch
+time: 30
+staff: 5
+slack: 140
+Latest starting time: 156
+dependants: 26 
+----------------TASK------------------
+Id: 24
+Name: Cast-tower-1
+time: 60
+staff: 7
+slack: 5
+Latest starting time: 64
+dependants: 4 27 
+----------------TASK------------------
+Id: 25
+Name: Cast-tower-2
+time: 60
+staff: 7
+slack: 0
+Latest starting time: 64
+dependants: 5 27 
+----------------TASK------------------
+Id: 26
+Name: Cast-arch
+time: 20
+staff: 7
+slack: 140
+Latest starting time: 186
+dependants: 31 
+----------------TASK------------------
+Id: 27
+Name: Stretch-two-maincables
+time: 25
+staff: 10
+slack: 0
+Latest starting time: 124
+dependants: 28 29 
+----------------TASK------------------
+Id: 28
+Name: Build-truss-1-with-rods
+time: 30
+staff: 10
+slack: 7
+Latest starting time: 156
+dependants: 1 6 7 30 
+----------------TASK------------------
+Id: 29
+Name: Build-truss-2-with-rods
+time: 37
+staff: 10
+slack: 0
+Latest starting time: 149
+dependants: 1 6 7 30 
+----------------TASK------------------
+Id: 30
+Name: Cast-lane-on-truss
+time: 20
+staff: 7
+slack: 0
+Latest starting time: 186
+dependants: 31 
+----------------TASK------------------
+Id: 31
+Name: Polish-lane-on-arch
+time: 12
+staff: 7
+slack: 0
+Latest starting time: 206
+dependants: 

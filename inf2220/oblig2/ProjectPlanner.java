@@ -6,12 +6,19 @@ class ProjectPlanner {
 	public static void main(String[] args) {
 		Project project = new Project();
 		File inFile = new File(args[0]);
+		int manPower = Integer.parseInt(args[1]);
+		if (manPower == 999) {
+			System.out.println("Using unlimited manpower");
+		}
+		else {
+			System.out.println("Limited manpower is not supported, quitting");
+			System.exit(1);
+		}
 		readFromFile(inFile, project);
 		project.sort();
-		project.printAllTasks();
 		project.printAllEdges();
 		project.run();
-		System.out.println("Ran program");
+		project.printAllTasks();
 	}
 
 	public static void readFromFile(File inFile, Project project) {
@@ -99,8 +106,8 @@ class Task implements Comparable<Task>{
 	int started_at = -1;
 	int finished_at = -1;
 	int finished_predecessors = 0;
+	int latest_start_suggestion = -1;
 
-	// To be used by Tarjans Algorithm 
 	boolean on_stack = false;
 
 	public void addPredecessor() {
@@ -118,6 +125,12 @@ class Task implements Comparable<Task>{
 		else {
 			System.out.println("Edge between " + Integer.toString(edge.v.id) + " and "  +
 				Integer.toString(edge.w.id) + " was already added to Task, tried to add again");
+		}
+	}
+
+	public void removeEdge(Edge edge) {
+		if (outEdges.contains(edge)) {
+			outEdges.remove(edge);
 		}
 	}
 
@@ -180,17 +193,18 @@ class Task implements Comparable<Task>{
 
 
 	public String toString() {
-		String ret = 	"Id: "+ Integer.toString(id) +
+		String ret = 	"----------------TASK------------------\n" +
+						"Id: "+ Integer.toString(id) +
 						"\nName: " + name +
 						"\ntime: " + Integer.toString(time) + 
-						"\nslack: " + Integer.toString(slack) +
 						"\nstaff: " + Integer.toString(staff) +
-						"\noutEdges to: ";
+						"\nslack: " + Integer.toString(slack) +
+						"\nLatest starting time: " + Integer.toString(latest_start_suggestion) +
+						"\ndependants: ";
 						
 		for (Edge edge : outEdges) {
 			ret = ret + Integer.toString(edge.w.id) + " ";
 		}
-		ret = ret + "\nnum_predecessors: " + Integer.toString(cntPredecessors);
 		return ret;
 	}
 
@@ -208,6 +222,17 @@ class Edge {
 	public String toString() {
 		return Integer.toString(v.id) + " --> " + Integer.toString(w.id);
 	}
+
+	public void flip() {
+		Task tmp = v;
+		this.w.addEdge(this);
+		this.v.removeEdge(this);
+		
+		this.v = w;
+		this.w = tmp;
+		w.addPredecessor();
+		v.removePredecessor();
+	}
 }
 
 class Project {
@@ -216,6 +241,7 @@ class Project {
 
 	ArrayList<Task> tasks = new ArrayList<>();
 	ArrayList<Edge> edges = new ArrayList<>();
+	int minimum_completion_time = 0;
 
 	private void readFromFile(String filename) {
 		;
@@ -242,7 +268,6 @@ class Project {
 		}
 		tmp.setParameters(name, time, staff, dependencies);
 	}
-
 
 	public void addEdge(Edge e) {
 		edges.add(e);
@@ -321,12 +346,13 @@ class Project {
 			t ++;
 			System.out.println(" ");
 			System.out.println("t: " + Integer.toString(t));
-
 		}
-		System.out.println("*** Shortest possible execution time is " + Integer.toString(t) + " ***");
+		minimum_completion_time = t;
+		System.out.println("*** Shortest possible execution time is " + Integer.toString(minimum_completion_time) + " ***");
+
+		setSlack();
 	}
 
-	// A limited implementation of Tarjans algorithm. Does not collect strongly connected areas, but returns false if any cycle is found.
 	private boolean checkRealizeable() {
 		// By Realizeable, we mean no cycles
 		ArrayList<Task> start_tasks = findTaskWithIndegreeZero();
@@ -361,5 +387,42 @@ class Project {
 			}
 		}
 		return ret;
+	}
+	private void flipEdges() {
+		for (Edge edge : edges) {
+			edge.flip();
+		}
+	}
+
+	private void setSlack() {
+		setLatestStartTimes();
+		for (Task task : tasks) {
+			task.slack = task.latest_start_suggestion-task.started_at;
+		}
+	}
+
+	private void setLatestStartTimes() {
+		flipEdges();
+		ArrayList<Task> start_tasks = findTaskWithIndegreeZero();
+		for (Task task : start_tasks) {
+			int t = minimum_completion_time;
+			setTimeBackwards(task, t);
+		}
+		flipEdges();	
+	}
+
+	private void setTimeBackwards(Task task, int t_) {
+		int t = t_-task.time;
+		if (task.latest_start_suggestion == -1) 
+			task.latest_start_suggestion = t;
+		else {
+			if (t<task.latest_start_suggestion) {
+				task.latest_start_suggestion = t;
+			}
+		}
+		for (Edge edge : task.outEdges) {
+			setTimeBackwards(edge.w, t);
+		}
+		return;
 	}
 }
