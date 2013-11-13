@@ -1,0 +1,27 @@
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\title{A string pattern algorithm}
+\author{Henrik Andersen Sveinsson}
+\date{\today}
+\begin{document}
+\maketitle
+
+\section{Algoritmen}
+
+Vi ser på et mønster $M = (m_1 ... m_n)$ av lengde $n$, og leter etter dette i en string S, der den i'te bokstaven i S er $s_i$. Match tilsvarer for ordens skyld et sett $(s_i ... s_{i+n})= M$.
+\begin{enumerate}
+\item Se på bokstav nummer $n$ i strengen. Dersom denne er inneholdt i M, er $d_1$ avstanden fra $n$ til siste forekomst av $s_n$. Dersom den ikke er inneholdt, settes $d_1 = n$.
+\item Dersom $d_1 = 0$, se på $s_{n-1}$, og gjør den samme vurderingen som i forrige instruks.
+\end{enumerate}
+
+
+\section{Bad character shift}
+Vi bestemmer 3 ting:
+\begin{enumerate}
+\item Scan mønster fra venstre til høyre
+\item $R(x)$ er posisjonen til den mest høyre forekomst av $x$ i $P$.
+\item i er posisjonen vi står på i mønsteret, målf fra høyre til venstre
+\end{enumerate}
+Dersom første mismatch er funnet i posisjon $i$, og $T(k)$ er bokstaven som mismatcher $P(i)$, så skift møsteret med $\max(1, i-R(T(k)))$. 
+
+\end{document}
