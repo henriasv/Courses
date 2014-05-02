@@ -1,3 +1,22 @@
+/*
+Henrik Andersen Sveinsson 02/05/2014
+
+Compile with:
+mpicc -fopenmp main.c -o <program_name>
+
+Run with: 
+mpirun -n <num_mpi_processes> ./<program_name> <path_to_input_matrix_A> <path_to_input_matrix_B> <num_openMP_processes_per_MPI_process (Optional)>
+
+SAMPLE:
+>> mpirun -n 9 ./a.out small_matrix_a.bin small_matrix_b.bin 4
+Reading matrix: 50 columns, 100 rows 
+Reading matrix: 100 columns, 50 rows 
+Wrote product matrix to file mat.bin
+
+*/
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -34,11 +53,6 @@ void assemble_matrix(matrix* C, matrix** submatrices, int** corner_indices, int 
 int main(int argc, char* argv[]){
 	int i, j, my_rank, num_procs, sq_p, num_threads;
 
-	if (argc == 3) {
-		num_threads = atoi(argv[3]);
-
-	}
-
 	matrix A;
 	matrix B;
 	matrix C;
@@ -46,8 +60,6 @@ int main(int argc, char* argv[]){
 	matrix my_submatrix_A;
 	matrix my_submatrix_B;
 	matrix my_submatrix_C;
-	matrix my_buffer_submatrix_A;
-	matrix my_buffer_submatrix_B;
 	
 	int* initial_grid_positions_A;
 	int* initial_grid_positions_B;
@@ -74,8 +86,21 @@ int main(int argc, char* argv[]){
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+	MPI_Status status;
 	sq_p = sqrt(num_procs);
 
+	if (argc == 4) {
+		num_threads = atoi(argv[3]);
+	}
+	else if (argc == 3)
+	{
+		num_threads = 1;
+	}
+	else
+	{
+		printf("usage: mpirun -n <num_procs> ./a.out <input_matrix_a> <input_matrix_b> <num_threads_omp>\n");
+		exit(1);
+	}
 	up_rank = cannon_shift_B_col_major(my_rank, sq_p);
 	down_rank = inv_cannon_shift_B_col_major(my_rank, sq_p);
 	left_rank = cannon_shift_A_col_major(my_rank, sq_p);
@@ -112,8 +137,9 @@ int main(int argc, char* argv[]){
 			corner_indices_C[i] = corner_indices_C[i-1] + 2;
 		}
 
-		read_matrix_binary("small_matrix_a.bin", &A);
-		read_matrix_binary("small_matrix_b.bin", &B);
+		read_matrix_binary(argv[1], &A);
+		read_matrix_binary(argv[2], &B);
+
 		allocate_matrix(&C, A.num_rows, B.num_cols);
 
 		split_matrix_col_major(submatrices_A, corner_indices_A, &num_rows_submatrix_A, &num_cols_submatrix_A, &A, num_procs);
@@ -128,7 +154,7 @@ int main(int argc, char* argv[]){
 			initial_grid_positions_A[i] = cannon_initial_position_A_col_major(i, sq_p);
 			initial_grid_positions_B[i] = cannon_initial_position_B_col_major(i, sq_p);
 		}
-	} // End of rank 0 work
+	}
 
 	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_Bcast(&num_rows_submatrix_A, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -137,18 +163,13 @@ int main(int argc, char* argv[]){
 	MPI_Bcast(&num_cols_submatrix_A, 1, MPI_INT, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&num_cols_submatrix_B, 1, MPI_INT, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&num_cols_submatrix_C, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
+	
 	MPI_Barrier(MPI_COMM_WORLD);
-
 	allocate_matrix(&my_submatrix_A, num_rows_submatrix_A, num_cols_submatrix_A);
 	allocate_matrix(&my_submatrix_B, num_rows_submatrix_B, num_cols_submatrix_B);
 	allocate_matrix(&my_submatrix_C, num_rows_submatrix_C, num_cols_submatrix_C);
-	allocate_matrix(&my_buffer_submatrix_A, num_rows_submatrix_A, num_cols_submatrix_A);
-	allocate_matrix(&my_buffer_submatrix_B, num_rows_submatrix_B, num_cols_submatrix_B);
 
-	MPI_Barrier(MPI_COMM_WORLD);
-	MPI_Status status;
-
+	// Send submatrices to their initial positions according to Cannons algorithm
 	if (my_rank == 0) {
 		for (i = 1; i<num_procs; i++) {
 			MPI_Send(	submatrices_A[i]->data[0], 
@@ -176,7 +197,6 @@ int main(int argc, char* argv[]){
 		
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
-
 	if (my_rank == 0) {
 		for (i = 1; i<num_procs; i++) {
 			MPI_Send(		submatrices_B[i]->data[0], 
@@ -200,6 +220,7 @@ int main(int argc, char* argv[]){
 			);
 	}
 
+	// Computation loop
 	for (i = 0; i<sq_p; i++) {
 		addMulitiplyMatrices(&my_submatrix_C, &my_submatrix_A, &my_submatrix_B, num_threads);
 
@@ -230,16 +251,7 @@ int main(int argc, char* argv[]){
 
 	MPI_Barrier(MPI_COMM_WORLD);
 
-	for (i = 0; i< num_procs; i++) {
-		if (my_rank == i) {
-			print_matrix(&my_submatrix_A);
-			print_matrix(&my_submatrix_B);
-			print_matrix(&my_submatrix_C);
-		}
-		MPI_Barrier(MPI_COMM_WORLD);
-	}
-
-	// Receive C submatrices
+	// Collect submatrices of C in process 0
 	if (my_rank != 0) {
 		MPI_Send( 	my_submatrix_C.data[0],
 			num_cols_submatrix_C*num_rows_submatrix_A,
@@ -249,7 +261,6 @@ int main(int argc, char* argv[]){
 			MPI_COMM_WORLD
 			);
 	}
-	printf("sent matrix c to process 0 from process %d\n", my_rank);
 	if (my_rank == 0) {
 		for (i = 1; i<num_procs; i++) {
 			MPI_Recv( 	submatrices_C[i]->data[0],
@@ -260,11 +271,11 @@ int main(int argc, char* argv[]){
 				MPI_COMM_WORLD,
 				&status
 				);
-			printf("received matrix c from %d in process 0\n", i);
 		}
 		add_to_matrix(submatrices_C[0], &my_submatrix_C);
 		assemble_matrix(&C, submatrices_C, corner_indices_C, num_procs);
 		write_matrix_binary("mat.bin", &C);
+		printf("Wrote product matrix to file mat.bin\n");
 	}
 	MPI_Finalize();
 }
@@ -342,10 +353,9 @@ void addMulitiplyMatrices(matrix* C, matrix* A, matrix* B, int num_threads) {
 		exit(1);
 	}
 #endif
-	omp_set_num_threads(num_threads);
 	int i, j, k;
-#pragma omp parallel for private(j, k)
-{
+	omp_set_num_threads(num_threads);
+#pragma omp parallel for private(i, j, k)
 	for (i = 0; i<A->num_rows; i++) {
 		for (j = 0; j<B->num_cols; j++) {
 			for (k = 0; k<A->num_cols; k++) {
@@ -353,7 +363,6 @@ void addMulitiplyMatrices(matrix* C, matrix* A, matrix* B, int num_threads) {
 			}
 		}
 	}
-}
 }
 
 void split_matrix_col_major(matrix** submatrices, int** corner_indices, int* num_rows_submatrix, int* num_cols_submatrix, matrix* C, int num_procs) {
@@ -398,7 +407,6 @@ void split_matrix_col_major(matrix** submatrices, int** corner_indices, int* num
 				rows_per_proc = rows_per_proc_estimate+1;
 			else
 				rows_per_proc = rows_per_proc_estimate;
-			printf("%d %d\n", i, j);
 			corner_indices[i*sq_p+j][0] = row_counter;
 			corner_indices[i*sq_p+j][1] = col_counter;
 			allocate_matrix(submatrices[i*sq_p+j], *num_rows_submatrix, *num_cols_submatrix);
@@ -427,56 +435,6 @@ void add_to_matrix(matrix* to, matrix* from) {
 	else {
 		printf("Cannot add to matrix because of dimension mismatch\n");
 		exit(1);
-	}
-}
-
-void add_multiply_submatrix_arrays_cannon(matrix** submatrices_C, matrix** submatrices_A, matrix**submatrices_B, int num_procs) {
-	int num_threads = 1;
-	int* grid_positions_A = (int*) malloc(num_procs*sizeof(int));
-	int* grid_positions_B = (int*) malloc(num_procs*sizeof(int));
-
-	int sq_p = sqrt(num_procs);
-
-	int i,j, k;
-	for (i=0; i<num_procs; i++) {
-		grid_positions_A[i] = cannon_initial_position_A_col_major(i, sq_p);
-		grid_positions_B[i] = cannon_initial_position_B_col_major(i, sq_p);
-	}
-
-	printf("grid_positions_A\n");
-	for (j = 0; j<num_procs; j++) {
-		printf("%d\n", grid_positions_A[j]);
-	}
-	printf("grid_positions_B\n");
-	for (j = 0; j<num_procs; j++) {
-		printf("%d\n", grid_positions_B[j]);
-	}
-
-	int current_proc;
-	int B_index;
-	for (i=0; i<sq_p; i++) {
-		for (j = 0; j<num_procs; j++) {
-			current_proc = grid_positions_A[j];
-			for (k = 0; k<num_procs; k++) {
-				if (grid_positions_B[k] == current_proc) {
-					B_index = k;
-				}
-			}
-			addMulitiplyMatrices(submatrices_C[current_proc], submatrices_A[j], submatrices_B[B_index], num_threads);
-		}
-		for (j=0; j<num_procs; j++) {
-			grid_positions_A[j] = cannon_shift_A_col_major(grid_positions_A[j], sq_p);
-			grid_positions_B[j] = cannon_shift_B_col_major(grid_positions_B[j], sq_p);
-		}
-
-		printf("grid_positions_A\n");
-		for (j = 0; j<num_procs; j++) {
-			printf("%d\n", grid_positions_A[j]);
-		}
-		printf("grid_positions_B\n");
-		for (j = 0; j<num_procs; j++) {
-			printf("%d\n", grid_positions_B[j]);
-		}
 	}
 }
 
@@ -526,17 +484,3 @@ int cannon_initial_position_A_col_major(int pos, int sq_p){
 int cannon_initial_position_B_col_major(int pos, int sq_p){
 	return (pos/sq_p)*sq_p + (pos%sq_p-pos/sq_p + sq_p)%sq_p;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
