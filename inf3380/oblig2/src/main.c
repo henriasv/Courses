@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-//#include <mpi.h>
+#include <mpi.h>
+#include <omp.h>
 
 
 
@@ -17,24 +18,43 @@ void read_matrix_binary(char* filename, matrix* mat);
 void write_matrix_binary(char* filename, matrix* mat);
 void allocate_matrix(matrix* mat, int num_rows, int num_cols);
 void print_matrix(matrix* mat);
-void addMulitiplyMatrices(matrix* C, matrix* A, matrix* B);
+void addMulitiplyMatrices(matrix* C, matrix* A, matrix* B, int num_threads);
 void split_matrix_col_major(matrix** submatrices, int** corner_indices, int* num_rows_submatrix, int* num_cols_submatrix, matrix* C, int num_procs);
 void add_to_matrix(matrix* to, matrix* from);
 void add_multiply_submatrix_arrays_cannon(matrix** submatrices_C, matrix** submatrices_A, matrix**submatrices_B, int num_procs);
 int cannon_shift_A_col_major(int pos, int sq_p);
+int inv_cannon_shift_A_col_major(int pos, int sq_p);
 int cannon_initial_position_A_col_major(int pos, int sq_p);
 int cannon_shift_B_col_major(int pos, int sq_p);
+int inv_cannon_shift_B_col_major(int pos, int sq_p);
 int cannon_initial_position_B_col_major(int pos, int sq_p);
 void assemble_matrix(matrix* C, matrix** submatrices, int** corner_indices, int num_procs);
 
-int main(int argc, char* argv[]){
 
-	int num_procs = 25;
-	// Three matrices
+int main(int argc, char* argv[]){
+	int i, j, my_rank, num_procs, sq_p, num_threads;
+
+	if (argc == 3) {
+		num_threads = atoi(argv[3]);
+
+	}
+
 	matrix A;
 	matrix B;
 	matrix C;
-	int i;
+
+	matrix my_submatrix_A;
+	matrix my_submatrix_B;
+	matrix my_submatrix_C;
+	matrix my_buffer_submatrix_A;
+	matrix my_buffer_submatrix_B;
+	
+	int* initial_grid_positions_A;
+	int* initial_grid_positions_B;
+
+	matrix** submatrices_A; 
+	matrix** submatrices_B; 
+	matrix** submatrices_C; 
 
 	int num_rows_submatrix_A;
 	int num_cols_submatrix_A;
@@ -45,68 +65,208 @@ int main(int argc, char* argv[]){
 	int num_rows_submatrix_C;
 	int num_cols_submatrix_C;
 
-	matrix** submatrices_A = (matrix**) malloc(num_procs*sizeof(matrix*));
-	submatrices_A[0] = (matrix*) malloc(num_procs*sizeof(matrix));
-	int** corner_indices_A = (int**) malloc(num_procs*sizeof(int*));	
-	corner_indices_A[0] = (int*) malloc(num_procs*sizeof(int)*2);
+	int left_rank, right_rank, up_rank, down_rank;
 
-	for (i = 1; i<num_procs; i++) {
-		submatrices_A[i] = submatrices_A[i-1] + 1;
-		corner_indices_A[i] = corner_indices_A[i-1] + 2;
+	int** corner_indices_A;
+	int** corner_indices_B;
+	int** corner_indices_C;
+
+	MPI_Init(&argc, &argv);
+	MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+	sq_p = sqrt(num_procs);
+
+	up_rank = cannon_shift_B_col_major(my_rank, sq_p);
+	down_rank = inv_cannon_shift_B_col_major(my_rank, sq_p);
+	left_rank = cannon_shift_A_col_major(my_rank, sq_p);
+	right_rank = inv_cannon_shift_A_col_major(my_rank, sq_p);
+
+	if (my_rank == 0) {
+		submatrices_A = (matrix**) malloc(num_procs*sizeof(matrix*));
+		submatrices_A[0] = (matrix*) malloc(num_procs*sizeof(matrix));
+		corner_indices_A = (int**) malloc(num_procs*sizeof(int*));	
+		corner_indices_A[0] = (int*) malloc(num_procs*sizeof(int)*2);
+
+		for (i = 1; i<num_procs; i++) {
+			submatrices_A[i] = submatrices_A[i-1] + 1;
+			corner_indices_A[i] = corner_indices_A[i-1] + 2;
+		}
+
+		submatrices_B = (matrix**) malloc(num_procs*sizeof(matrix*));
+		submatrices_B[0] = (matrix*) malloc(num_procs*sizeof(matrix));
+		corner_indices_B = (int**) malloc(num_procs*sizeof(int*));	
+		corner_indices_B[0] = (int*) malloc(num_procs*sizeof(int)*2);
+
+		for (i = 1; i<num_procs; i++) {
+			submatrices_B[i] = submatrices_B[i-1] + 1;
+			corner_indices_B[i] = corner_indices_B[i-1] + 2;
+		}
+
+		submatrices_C = (matrix**) malloc(num_procs*sizeof(matrix*));
+		submatrices_C[0] = (matrix*) malloc(num_procs*sizeof(matrix));
+		corner_indices_C = (int**) malloc(num_procs*sizeof(int*));	
+		corner_indices_C[0] = (int*) malloc(num_procs*sizeof(int)*2);
+
+		for (i = 1; i<num_procs; i++) {
+			submatrices_C[i] = submatrices_C[i-1] + 1;
+			corner_indices_C[i] = corner_indices_C[i-1] + 2;
+		}
+
+		read_matrix_binary("small_matrix_a.bin", &A);
+		read_matrix_binary("small_matrix_b.bin", &B);
+		allocate_matrix(&C, A.num_rows, B.num_cols);
+
+		split_matrix_col_major(submatrices_A, corner_indices_A, &num_rows_submatrix_A, &num_cols_submatrix_A, &A, num_procs);
+		split_matrix_col_major(submatrices_B, corner_indices_B, &num_rows_submatrix_B, &num_cols_submatrix_B, &B, num_procs);
+		split_matrix_col_major(submatrices_C, corner_indices_C, &num_rows_submatrix_C, &num_cols_submatrix_C, &C, num_procs);
+
+
+		initial_grid_positions_A = (int*) malloc(num_procs*sizeof(int));
+		initial_grid_positions_B = (int*) malloc(num_procs*sizeof(int));
+
+		for (i = 0; i<num_procs; i++) {
+			initial_grid_positions_A[i] = cannon_initial_position_A_col_major(i, sq_p);
+			initial_grid_positions_B[i] = cannon_initial_position_B_col_major(i, sq_p);
+		}
+	} // End of rank 0 work
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Bcast(&num_rows_submatrix_A, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&num_rows_submatrix_B, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&num_rows_submatrix_C, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&num_cols_submatrix_A, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&num_cols_submatrix_B, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&num_cols_submatrix_C, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	allocate_matrix(&my_submatrix_A, num_rows_submatrix_A, num_cols_submatrix_A);
+	allocate_matrix(&my_submatrix_B, num_rows_submatrix_B, num_cols_submatrix_B);
+	allocate_matrix(&my_submatrix_C, num_rows_submatrix_C, num_cols_submatrix_C);
+	allocate_matrix(&my_buffer_submatrix_A, num_rows_submatrix_A, num_cols_submatrix_A);
+	allocate_matrix(&my_buffer_submatrix_B, num_rows_submatrix_B, num_cols_submatrix_B);
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Status status;
+
+	if (my_rank == 0) {
+		for (i = 1; i<num_procs; i++) {
+			MPI_Send(	submatrices_A[i]->data[0], 
+				num_rows_submatrix_A*num_cols_submatrix_A,
+				MPI_DOUBLE, 
+				initial_grid_positions_A[i],
+				1,
+				MPI_COMM_WORLD
+				);	
+		}
+		// Special case of filling submatrix i process 0
+		add_to_matrix(&my_submatrix_A, submatrices_A[0]);
+		add_to_matrix(&my_submatrix_B, submatrices_B[0]);
+	}
+	else {
+		MPI_Recv(
+			my_submatrix_A.data[0],
+			num_rows_submatrix_A*num_cols_submatrix_A,
+			MPI_DOUBLE,
+			0,
+			1,
+			MPI_COMM_WORLD,
+			&status
+			);
+		
+	}
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	if (my_rank == 0) {
+		for (i = 1; i<num_procs; i++) {
+			MPI_Send(		submatrices_B[i]->data[0], 
+				num_rows_submatrix_B*num_cols_submatrix_B,
+				MPI_DOUBLE, 
+				initial_grid_positions_B[i],
+				2,
+				MPI_COMM_WORLD
+				);
+		}
+	} 
+	else {
+		MPI_Recv(
+			my_submatrix_B.data[0],
+			num_rows_submatrix_B*num_cols_submatrix_B,
+			MPI_DOUBLE,
+			0,
+			2,
+			MPI_COMM_WORLD,
+			&status
+			);
 	}
 
-	matrix** submatrices_B = (matrix**) malloc(num_procs*sizeof(matrix*));
-	submatrices_B[0] = (matrix*) malloc(num_procs*sizeof(matrix));
-	int** corner_indices_B = (int**) malloc(num_procs*sizeof(int*));	
-	corner_indices_B[0] = (int*) malloc(num_procs*sizeof(int)*2);
+	for (i = 0; i<sq_p; i++) {
+		addMulitiplyMatrices(&my_submatrix_C, &my_submatrix_A, &my_submatrix_B, num_threads);
 
-	for (i = 1; i<num_procs; i++) {
-		submatrices_B[i] = submatrices_B[i-1] + 1;
-		corner_indices_B[i] = corner_indices_B[i-1] + 2;
+		// Shift matrix A to the left
+		MPI_Sendrecv_replace(	my_submatrix_A.data[0],
+			num_cols_submatrix_A*num_rows_submatrix_A,
+			MPI_DOUBLE,
+			left_rank,
+			1, 
+			right_rank, 
+			1, 
+			MPI_COMM_WORLD, 
+			&status
+			);
+
+		// Shift matrix B to the left
+		MPI_Sendrecv_replace(	my_submatrix_B.data[0],
+			num_cols_submatrix_B*num_rows_submatrix_B,
+			MPI_DOUBLE,
+			up_rank,
+			1, 
+			down_rank, 
+			1, 
+			MPI_COMM_WORLD, 
+			&status
+			);
 	}
 
-	matrix** submatrices_C = (matrix**) malloc(num_procs*sizeof(matrix*));
-	submatrices_C[0] = (matrix*) malloc(num_procs*sizeof(matrix));
-	int** corner_indices_C = (int**) malloc(num_procs*sizeof(int*));	
-	corner_indices_C[0] = (int*) malloc(num_procs*sizeof(int)*2);
+	MPI_Barrier(MPI_COMM_WORLD);
 
-	for (i = 1; i<num_procs; i++) {
-		submatrices_C[i] = submatrices_C[i-1] + 1;
-		corner_indices_C[i] = corner_indices_C[i-1] + 2;
+	for (i = 0; i< num_procs; i++) {
+		if (my_rank == i) {
+			print_matrix(&my_submatrix_A);
+			print_matrix(&my_submatrix_B);
+			print_matrix(&my_submatrix_C);
+		}
+		MPI_Barrier(MPI_COMM_WORLD);
 	}
 
-	read_matrix_binary("small_matrix_a.bin", &A);
-	read_matrix_binary("small_matrix_b.bin", &B);
-	allocate_matrix(&C, A.num_rows, B.num_cols);
-
-	write_matrix_binary("mat_A.bin", &A);
-	write_matrix_binary("mat_B.bin", &B);
-	//write_matrix_binary("mat.bin", &C);
-
-	//split_matrix_col_major()
-	split_matrix_col_major(submatrices_A, corner_indices_A, &num_rows_submatrix_A, &num_cols_submatrix_A, &A, num_procs);
-	split_matrix_col_major(submatrices_B, corner_indices_B, &num_rows_submatrix_B, &num_cols_submatrix_B, &B, num_procs);
-	split_matrix_col_major(submatrices_C, corner_indices_C, &num_rows_submatrix_C, &num_cols_submatrix_C, &C, num_procs);
-
-	add_multiply_submatrix_arrays_cannon(submatrices_C, submatrices_A, submatrices_B, num_procs);
-
-/*
-	for (i = 0; i<num_procs; i++) {
-		printf("%d\n", i);
-		print_matrix(submatrices_C[i]);
-		printf("corner_indices_C[%d][0] = %d\n", i, corner_indices_C[i][0]);
-		printf("corner_indices_C[%d][1] = %d\n", i, corner_indices_C[i][1]);
+	// Receive C submatrices
+	if (my_rank != 0) {
+		MPI_Send( 	my_submatrix_C.data[0],
+			num_cols_submatrix_C*num_rows_submatrix_A,
+			MPI_DOUBLE,
+			0,
+			1,
+			MPI_COMM_WORLD
+			);
 	}
-	*/
-
-	assemble_matrix(&C, submatrices_C, corner_indices_C, num_procs);
-	write_matrix_binary("mat.bin", &C);
-	//print_matrix(&C);
-
-
-	//print_matrix(&A);
-	//print_matrix(&B);
-	//print_matrix(&C);
+	printf("sent matrix c to process 0 from process %d\n", my_rank);
+	if (my_rank == 0) {
+		for (i = 1; i<num_procs; i++) {
+			MPI_Recv( 	submatrices_C[i]->data[0],
+				num_cols_submatrix_C*num_rows_submatrix_C,
+				MPI_DOUBLE,
+				i,
+				1,
+				MPI_COMM_WORLD,
+				&status
+				);
+			printf("received matrix c from %d in process 0\n", i);
+		}
+		add_to_matrix(submatrices_C[0], &my_submatrix_C);
+		assemble_matrix(&C, submatrices_C, corner_indices_C, num_procs);
+		write_matrix_binary("mat.bin", &C);
+	}
+	MPI_Finalize();
 }
 
 void read_matrix_binary(char* filename, matrix* mat) {
@@ -167,8 +327,8 @@ void print_matrix(matrix* mat) {
 }
 
 
-void addMulitiplyMatrices(matrix* C, matrix* A, matrix* B) {
-	/* Check if dimensions are OK for multiplication */
+void addMulitiplyMatrices(matrix* C, matrix* A, matrix* B, int num_threads) {
+#ifdef DEBUG
 	if (A->num_cols != B->num_rows) {
 		printf("num_cols of A != num_rows of B\n");
 		exit(1);
@@ -181,9 +341,11 @@ void addMulitiplyMatrices(matrix* C, matrix* A, matrix* B) {
 		printf("num_cols of C < num_cols of B\n");
 		exit(1);
 	}
-
+#endif
+	omp_set_num_threads(num_threads);
 	int i, j, k;
-
+#pragma omp parallel for private(j, k)
+{
 	for (i = 0; i<A->num_rows; i++) {
 		for (j = 0; j<B->num_cols; j++) {
 			for (k = 0; k<A->num_cols; k++) {
@@ -191,7 +353,7 @@ void addMulitiplyMatrices(matrix* C, matrix* A, matrix* B) {
 			}
 		}
 	}
-
+}
 }
 
 void split_matrix_col_major(matrix** submatrices, int** corner_indices, int* num_rows_submatrix, int* num_cols_submatrix, matrix* C, int num_procs) {
@@ -227,10 +389,10 @@ void split_matrix_col_major(matrix** submatrices, int** corner_indices, int* num
 	int row_counter = 0;
 	int col_counter = 0;
 	for (i = 0; i<sq_p; i++) {
-			if (i<col_remainder)
-				cols_per_proc = cols_per_proc_estimate+1;
-			else 
-				cols_per_proc = cols_per_proc_estimate;
+		if (i<col_remainder)
+			cols_per_proc = cols_per_proc_estimate+1;
+		else 
+			cols_per_proc = cols_per_proc_estimate;
 		for (j=0; j<sq_p; j++) {
 			if (j<row_remainder)
 				rows_per_proc = rows_per_proc_estimate+1;
@@ -269,6 +431,7 @@ void add_to_matrix(matrix* to, matrix* from) {
 }
 
 void add_multiply_submatrix_arrays_cannon(matrix** submatrices_C, matrix** submatrices_A, matrix**submatrices_B, int num_procs) {
+	int num_threads = 1;
 	int* grid_positions_A = (int*) malloc(num_procs*sizeof(int));
 	int* grid_positions_B = (int*) malloc(num_procs*sizeof(int));
 
@@ -299,7 +462,7 @@ void add_multiply_submatrix_arrays_cannon(matrix** submatrices_C, matrix** subma
 					B_index = k;
 				}
 			}
-			addMulitiplyMatrices(submatrices_C[current_proc], submatrices_A[j], submatrices_B[B_index]);
+			addMulitiplyMatrices(submatrices_C[current_proc], submatrices_A[j], submatrices_B[B_index], num_threads);
 		}
 		for (j=0; j<num_procs; j++) {
 			grid_positions_A[j] = cannon_shift_A_col_major(grid_positions_A[j], sq_p);
@@ -341,13 +504,19 @@ void assemble_matrix(matrix* C, matrix** submatrices, int** corner_indices, int 
 }
 
 int cannon_shift_A_col_major(int pos, int sq_p) {
-	int new_pos = (pos-sq_p+sq_p*sq_p)%(sq_p*sq_p);
-	return new_pos;
+	return (pos-sq_p+sq_p*sq_p)%(sq_p*sq_p);
 }
 
 int cannon_shift_B_col_major(int pos, int sq_p) {
-	int new_pos = (pos/sq_p)*sq_p + (pos%sq_p-1+sq_p)%sq_p;
-	return new_pos;
+	return (pos/sq_p)*sq_p + (pos%sq_p-1+sq_p)%sq_p;
+}
+
+int inv_cannon_shift_A_col_major(int pos, int sq_p) {
+	return (pos+sq_p)%(sq_p*sq_p);
+}
+
+int inv_cannon_shift_B_col_major(int pos, int sq_p) {
+	return (pos/sq_p)*sq_p + (pos%sq_p+1)%sq_p;
 }
 
 int cannon_initial_position_A_col_major(int pos, int sq_p){
