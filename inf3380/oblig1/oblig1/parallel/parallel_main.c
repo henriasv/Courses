@@ -17,7 +17,7 @@ void convert_image_to_jpeg(const image *u, unsigned char* image_chars);
 void iso_diffusion_denoising(image *u, image *u_bar, float kappa);
 
 int main(int argc, char* argv[]) {
-	int m, n, c, iters;
+	int m, n, c, iters, i;
 	int my_m, my_n, last_m,my_rank, num_procs;
 	float kappa;
 	image u, u_bar;
@@ -33,8 +33,8 @@ int main(int argc, char* argv[]) {
   /* read from command line: kappa, iters, input_jpeg_filename, output_jpeg_filename */
   /* ... */
 	if (argc == 5) {
-		kappa = atof(argv[1]);
-		iters = atoi(argv[2]);
+		kappa = atof(argv[2]);
+		iters = atoi(argv[1]);
 		input_jpeg_filename = argv[3];
 		output_jpeg_filename = argv[4];
 		if (my_rank == 0) {
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
 	allocate_image(&u_bar, my_m, my_n);
 
 	convert_jpeg_to_image(my_image_chars, &u);
-	for (int i = 0; i<iters; i++){
+	for (i = 0; i<iters; i++){
 		iso_diffusion_denoising(&u, &u_bar, kappa);
 		if (my_rank == 0) printf("Iteration %d\n", i);
 		// Communication
@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
 			MPI_Recv(u.image_data[my_m-1], my_n, MPI_FLOAT, my_rank+1, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 		
 
-	} 
+	}
 	convert_image_to_jpeg(&u, my_image_chars);
 
 	if (my_rank != 0) MPI_Send(my_image_chars, my_m*my_n, MPI_UNSIGNED_CHAR, 0, 0, MPI_COMM_WORLD);

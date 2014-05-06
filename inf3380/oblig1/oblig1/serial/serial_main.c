@@ -35,8 +35,8 @@ int main(int argc, char *argv[])
   /* read from command line: kappa, iters, input_jpeg_filename, output_jpeg_filename */
   /* ... */
 	if (argc == 5) {
-		kappa = atof(argv[1]);
-		iters = atoi(argv[2]);
+		kappa = atof(argv[2]);
+		iters = atoi(argv[1]);
 		input_jpeg_filename = argv[3];
 		output_jpeg_filename = argv[4];
 		printf("iters %d \n kappa %f \n input filename %s \n output filename %s \n", iters
@@ -103,7 +103,6 @@ void iso_diffusion_denoising(image *u, image *u_bar, float kappa, int iters){
 	
 	for (k = 0; k<iters; k++) {
 		printf("Iteration number %d \n", k);
-		printf("m=%d n=%d \n", i, j);
 		for (i=1; i<m-1; i++) {
 			for (j=1; j<n-1; j++) {
 				u_bar_array[i][j] = u_array[i][j] + kappa*(u_array[i-1][j] + u_array[i][j-1] - 4*u_array[i][j] + u_array[i][j+1] + u_array[i+1]

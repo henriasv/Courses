@@ -1,6 +1,6 @@
 CC = mpicc
-CFLAGS = -O2 -Wall -I/usr/local/Cellar/open-mpi/1.6.5/include
-LDFLAGS = -L../simple-jpeg/ -lsimplejpeg -L/usr/local/Cellar/open-mpi/1.6.5/lib -lmpi -lm
+CFLAGS = -O2
+LDFLAGS = -L../simple-jpeg/ -lsimplejpeg -lmpi -lm
 
 PROJ = parallel_main
 OBJS = parallel_main.o

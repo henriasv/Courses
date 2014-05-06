@@ -1,0 +1,5 @@
+To test the oblig, place a jpeg image file "mona_lisa_noisy.jpg" in the oblig1 directory and run ./oblig1test
+
+This invokes make on the top level Makefile, and runs the resulting executables to produce two ouptut jpg-files: One from the parallel version and one from the serial version.
+
+The picture file is omitted from the delivery to save space.
